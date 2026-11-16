@@ -1,0 +1,5 @@
+annotation_id,image_uri,image_name,well,field,well_metadata,channel,timepoint,z_slice,split,status,annotation_type,created_at,session,input_file,mask_file,input_digest,mask_digest,external_ids
+a1b2c3,omero:image:101,B2_f0,B2,0,"{""treatment"":""DMSO""}",0,0,0,training,annotated,segmentation_mask,2026-11-10T14:30:00+01:00,1,annotation_input/a1b2c3.tif,annotation_output/a1b2c3_mask.tif,9f2c0e3b5a7d4c1e8f6a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f70,1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e7f809,"{""omero_roi"":""555""}"
+d4e5f6,omero:image:102,B3_f0,B3,0,"{""treatment"":""DMSO""}",0,0,0,validation,annotated,segmentation_mask,2026-11-10T14:50:00+01:00,1,annotation_input/d4e5f6.tif,annotation_output/d4e5f6_mask.tif,,,
+g7h8i9,omero:image:103,C2_f0,C2,0,"{""treatment"":""drug""}",0,0,0,training,excluded,,2026-11-10T15:10:00+01:00,1,,,,,
+j0k1l2,omero:image:104,C3_f0,C3,0,"{""treatment"":""drug""}",0,0,0,training,pending,,,,,,,,

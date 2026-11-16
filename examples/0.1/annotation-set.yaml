@@ -1,0 +1,62 @@
+schema_version: "0.1.0"
+name: u2os-nuclei-hcs
+description: Nuclei in a U2OS high-content screen, annotated with micro-SAM for fine-tuning.
+created: "2026-11-10T14:02:00+01:00"
+license: CC-BY-4.0
+authors:
+  - name: Jane Example
+    affiliation: Example University
+    orcid: https://orcid.org/0000-0002-1825-0097
+keywords: [nuclei, segmentation, high-content screening]
+study:
+  title: Nuclear morphology under drug treatment
+  organism: Homo sapiens
+  imaging_method: widefield fluorescence microscopy
+source_dataset:
+  description: 384-well plate, Hoechst and brightfield
+  identifier: idr0000
+  url: https://idr.openmicroscopy.org/
+methodology:
+  overview: Instance masks of nuclei, proposed by micro-SAM and corrected by hand
+  annotation_types: [segmentation_mask]
+  mask_kind: instance
+  method: semi_automatic
+  criteria: Every in-focus nucleus fully inside the field; touching nuclei separated.
+  coverage: all
+  tools:
+    - name: micro-sam
+      version: "1.8.0"
+      mode: interactive
+      model: { name: vit_b_lm }
+classes:
+  - name: nucleus
+    ontology_term: http://purl.obolibrary.org/obo/GO_0005634
+    color: "#0FA3B1"
+sampling:
+  label_channel: 0
+  input_channels: [1]
+  timepoints: { mode: specific, values: [0] }
+  z_slices: { mode: specific, values: [0] }
+  volumetric: false
+split:
+  strategy: random_split
+  unit: well
+  rationale: fields within a well show the same cells' neighbourhood
+  stratify_by: [treatment]
+  seed: 42
+normalization: { method: percentile, percentile_low: 1.0, percentile_high: 99.8, clip: true }
+sessions:
+  - id: 1
+    kind: annotate
+    started: "2026-11-10T14:05:00+01:00"
+    ended: "2026-11-10T15:20:00+01:00"
+    status: finished
+    annotator: jexample
+    software: omero-annotate-ai 0.5.0
+    model: vit_b_lm
+    n_annotated: 2
+    note: first pass, control wells
+extensions:
+  omero-annotate-ai:
+    storage: omero
+    table_id: 1234

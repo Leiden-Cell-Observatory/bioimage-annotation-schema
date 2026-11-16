@@ -1,0 +1,19 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "bioimage-annotation-schema"
+version = "0.1.0"
+description = "Bioimage Annotation Schema: FAIR metadata for image annotations used to train AI models (LinkML, JSON Schema, Pydantic)."
+readme = "README.md"
+license = "CC-BY-4.0"
+requires-python = ">=3.10"
+dependencies = ["pydantic>=2"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/bioimage_annotation_schema"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"src/linkml/bioimage_annotation_schema.yaml" = "bioimage_annotation_schema/schema/bioimage_annotation_schema.yaml"
+"schema/0.1" = "bioimage_annotation_schema/schema/0.1"

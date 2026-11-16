@@ -1,0 +1,17 @@
+{
+  "title": "Bioimage Annotation Schema",
+  "upload_type": "dataset",
+  "description": "An open schema (LinkML, with generated JSON Schema and Pydantic models) for sets of image annotations made to train or evaluate AI models, with mappings to MIFA.",
+  "creators": [
+    { "name": "Paul, Maarten", "affiliation": "Leiden University" }
+  ],
+  "license": "cc-by-4.0",
+  "keywords": ["bioimage", "annotation", "FAIR", "training data", "MIFA", "LinkML"],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/Leiden-Cell-Observatory/omero_annotate_ai",
+      "relation": "isSupplementedBy",
+      "scheme": "url"
+    }
+  ]
+}

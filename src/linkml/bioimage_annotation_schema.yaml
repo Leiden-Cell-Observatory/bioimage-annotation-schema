@@ -1,0 +1,629 @@
+id: https://w3id.org/bioimage-annotation-schema
+name: bioimage_annotation_schema
+title: Bioimage Annotation Schema
+version: 0.1.0
+description: >-
+  Describes sets of image annotations made for training or evaluating AI models:
+  what was annotated, from which images, how, by whom, and how the annotations are
+  split, plus one record per annotation. Fields that correspond to MIFA
+  (bia-mifa-models, BioImage Archive) carry mappings to it, so a MIFA submission can
+  be derived from a document that follows this schema.
+license: CC-BY-4.0
+see_also:
+  - https://github.com/Leiden-Cell-Observatory/bioimage-annotation-schema
+
+prefixes:
+  bas: https://w3id.org/bioimage-annotation-schema/
+  linkml: https://w3id.org/linkml/
+  mifa: https://w3id.org/BioImage-Archive/bia-mifa-models/
+  schema: http://schema.org/
+  pav: http://purl.org/pav/
+  prov: http://www.w3.org/ns/prov#
+default_prefix: bas
+default_range: string
+
+imports:
+  - linkml:types
+
+classes:
+
+  AnnotationSet:
+    tree_root: true
+    description: >-
+      A set of image annotations for AI: one document per set. The annotations
+      themselves are AnnotationRecords, usually kept as a CSV table next to it.
+    class_uri: schema:Dataset
+    close_mappings:
+      - mifa:Annotations
+    attributes:
+      schema_version:
+        description: Version of this schema the document follows (semantic versioning).
+        required: true
+        pattern: "^0\\.1\\.[0-9]+$"
+      name:
+        description: Short name of the set.
+        required: true
+        slot_uri: schema:name
+      description:
+        slot_uri: schema:description
+      created:
+        description: When the set was created.
+        required: true
+        range: datetime
+        slot_uri: schema:dateCreated
+      license:
+        description: License of the annotations, preferably an SPDX identifier (CC-BY-4.0, CC0-1.0).
+        required: true
+        slot_uri: schema:license
+        close_mappings:
+          - mifa:license
+      authors:
+        range: Person
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: schema:author
+        exact_mappings:
+          - mifa:author
+      keywords:
+        multivalued: true
+        slot_uri: schema:keywords
+        exact_mappings:
+          - mifa:keywords
+      study:
+        range: Study
+        inlined: true
+      source_dataset:
+        range: SourceDataset
+        inlined: true
+      methodology:
+        range: Methodology
+        required: true
+        inlined: true
+      classes:
+        description: The annotation classes (e.g. nucleus, cell, background).
+        range: AnnotationClass
+        multivalued: true
+        inlined_as_list: true
+      sampling:
+        range: Sampling
+        inlined: true
+      split:
+        range: Split
+        inlined: true
+      normalization:
+        range: Normalization
+        inlined: true
+      sessions:
+        description: Annotation sessions, oldest first. Records refer to them by id.
+        range: Session
+        multivalued: true
+        inlined_as_list: true
+      notes:
+        description: Free text - context, caveats, known issues.
+      extensions:
+        description: >-
+          Tool- or project-specific metadata this schema does not cover, under a
+          namespace key such as the tool name.
+        range: Any
+
+  Any:
+    class_uri: linkml:Any
+    description: Any value.
+
+  Person:
+    class_uri: schema:Person
+    close_mappings:
+      - mifa:Author
+    attributes:
+      name:
+        required: true
+        slot_uri: schema:name
+      affiliation:
+        slot_uri: schema:affiliation
+      orcid:
+        description: ORCID iD as URL.
+        pattern: "^https://orcid\\.org/[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9X]$"
+        exact_mappings:
+          - mifa:orcid_id
+      email:
+        slot_uri: schema:email
+        exact_mappings:
+          - mifa:email
+
+  Study:
+    description: Biological and experimental context of the images.
+    close_mappings:
+      - mifa:Study
+    attributes:
+      title:
+        required: true
+        exact_mappings:
+          - mifa:title
+      description:
+        exact_mappings:
+          - mifa:description
+      organism:
+      imaging_method:
+      funding_statement:
+        exact_mappings:
+          - mifa:funding_statement
+
+  SourceDataset:
+    description: The image dataset the annotated images come from.
+    attributes:
+      description:
+        required: true
+      identifier:
+        description: Accession or DOI, e.g. S-BIAD123 or idr0001.
+        slot_uri: schema:identifier
+      url:
+        range: uri
+        slot_uri: schema:url
+      license:
+        slot_uri: schema:license
+
+  Methodology:
+    description: How the annotations were made.
+    attributes:
+      overview:
+        description: Short summary of the type of annotation and how it was made.
+        exact_mappings:
+          - mifa:annotation_overview
+      annotation_types:
+        range: AnnotationType
+        required: true
+        multivalued: true
+        exact_mappings:
+          - mifa:annotation_type
+      mask_kind:
+        description: For segmentation masks - one value per object (instance) or per class (semantic).
+        range: MaskKind
+      method:
+        range: AnnotationMethod
+      method_description:
+        description: >-
+          How the annotations were created, in words: who, which software,
+          consensus and quality checks.
+        exact_mappings:
+          - mifa:annotation_method
+      criteria:
+        description: What counts as an object and where its boundary is, in words.
+        required: true
+        exact_mappings:
+          - mifa:annotation_criteria
+      coverage:
+        description: >-
+          Within an annotated region, whether all objects are annotated, a
+          representative selection, or only some.
+        range: Coverage
+      coverage_description:
+        description: Which images were annotated and what share of the dataset, in words.
+        exact_mappings:
+          - mifa:annotation_coverage
+      confidence_level:
+        description: Confidence in the annotations' accuracy, e.g. annotator experience or inter-annotator agreement.
+        exact_mappings:
+          - mifa:annotation_confidence_level
+      tools:
+        range: Tool
+        multivalued: true
+        inlined_as_list: true
+
+  Tool:
+    class_uri: schema:SoftwareApplication
+    attributes:
+      name:
+        required: true
+        slot_uri: schema:name
+      version:
+        slot_uri: schema:softwareVersion
+      mode:
+        range: ToolMode
+      model:
+        range: Model
+        inlined: true
+      parameters:
+        range: Any
+
+  Model:
+    description: An AI model that proposed annotations.
+    attributes:
+      name:
+        required: true
+      version:
+      url:
+        range: uri
+      doi:
+
+  AnnotationClass:
+    description: One annotation class.
+    attributes:
+      name:
+        required: true
+      description:
+      label_value:
+        description: >-
+          Pixel value of the class in semantic masks. Not used for instance masks,
+          where each object has its own value.
+        range: integer
+        minimum_value: 0
+      ontology_term:
+        description: IRI of an ontology term for the class, e.g. a CL or GO term.
+        range: uri
+      color:
+        pattern: "^#[0-9A-Fa-f]{6}$"
+
+  PlaneSelection:
+    description: Which timepoints or z-slices were annotated.
+    attributes:
+      mode:
+        range: SelectionMode
+        required: true
+      values:
+        description: The indices, for mode 'specific'.
+        range: integer
+        multivalued: true
+      n:
+        description: How many were drawn, for mode 'random'.
+        range: integer
+        minimum_value: 1
+
+  Sampling:
+    description: Which parts of the images were annotated. Per-annotation detail is in the records.
+    attributes:
+      label_channel:
+        description: Channel the annotations were drawn on.
+        range: integer
+        minimum_value: 0
+      input_channels:
+        description: >-
+          Channels meant as model input; may differ from label_channel (annotate on
+          a nuclear stain, train on brightfield).
+        range: integer
+        multivalued: true
+      timepoints:
+        range: PlaneSelection
+        inlined: true
+      z_slices:
+        range: PlaneSelection
+        inlined: true
+      volumetric:
+        description: True if annotations are 3D volumes rather than 2D planes.
+        range: boolean
+      patches:
+        range: Patches
+        inlined: true
+
+  Patches:
+    description: Present if annotations cover patches rather than whole planes.
+    attributes:
+      width:
+        range: integer
+        required: true
+        minimum_value: 1
+      height:
+        range: integer
+        required: true
+        minimum_value: 1
+      per_image:
+        range: integer
+        minimum_value: 1
+      random:
+        range: boolean
+
+  Split:
+    description: How annotations were divided over training, validation and test.
+    attributes:
+      strategy:
+        range: SplitStrategy
+      unit:
+        description: >-
+          Level at which data are assigned to a split; all annotations of one unit
+          share a split. 'image' or 'well', or another level named by the tool.
+      rationale:
+        description: Why this unit, e.g. 'fields within a well do not overlap'.
+      stratify_by:
+        description: Metadata keys the split was balanced on (e.g. cell_line, treatment).
+        multivalued: true
+      seed:
+        description: Seed of the random choices, to reproduce the selection with the same tool.
+        range: integer
+        minimum_value: 0
+
+  Normalization:
+    description: Intensity normalisation intended for model input.
+    attributes:
+      method:
+        range: NormalizationMethod
+        required: true
+      percentile_low:
+        range: float
+        minimum_value: 0
+        maximum_value: 100
+      percentile_high:
+        range: float
+        minimum_value: 0
+        maximum_value: 100
+      clip:
+        range: boolean
+
+  Session:
+    description: One annotation session - who, when, with what, and a note.
+    class_uri: prov:Activity
+    attributes:
+      id:
+        range: integer
+        required: true
+        minimum_value: 0
+      kind:
+        description: "'annotate' creates annotations, 'review' checks or corrects them."
+        range: SessionKind
+        required: true
+      started:
+        range: datetime
+        required: true
+        slot_uri: prov:startedAtTime
+      ended:
+        range: datetime
+        slot_uri: prov:endedAtTime
+      status:
+        range: SessionStatus
+      annotator:
+        description: Who annotated - a name, ORCID or pseudonym.
+      software:
+        description: Software and version, e.g. 'omero-annotate-ai 0.5.0'.
+      model:
+        description: Name of the AI model used in the session, if any.
+      n_annotated:
+        range: integer
+        minimum_value: 0
+      note:
+
+  AnnotationRecord:
+    description: >-
+      One annotation of a set: the image region it covers, its split, its state and
+      its files. Flat, so a table of records is a CSV file with one column per
+      field (well_metadata and external_ids as JSON text).
+    close_mappings:
+      - mifa:FileLevelMetadata
+    attributes:
+      annotation_id:
+        description: Identifier of the annotation, unique within the set. Files are named after it.
+        identifier: true
+        required: true
+        slot_uri: schema:identifier
+        exact_mappings:
+          - mifa:annotation_id
+      image_uri:
+        description: >-
+          The source image - omero:image:<id>, an http(s) URL of an OME-Zarr image,
+          or another resolvable URI.
+        required: true
+        exact_mappings:
+          - mifa:source_image_id
+      image_name:
+      level:
+        description: Multiscale level the coordinates refer to (0 = full resolution).
+        range: integer
+        minimum_value: 0
+      well:
+        description: Plate well, e.g. B2.
+      field:
+        description: Field (well sample) within the well.
+      well_metadata:
+        description: Key-value metadata of the well as a JSON object, e.g. {"cell_line":"U2OS"}.
+      channel:
+        range: integer
+        minimum_value: 0
+      timepoint:
+        range: integer
+        minimum_value: 0
+      z_slice:
+        description: Z-slice of a 2D annotation.
+        range: integer
+        minimum_value: 0
+      z_start:
+        description: First z-slice of a volumetric annotation.
+        range: integer
+        minimum_value: 0
+      z_end:
+        description: Last z-slice of a volumetric annotation (inclusive).
+        range: integer
+        minimum_value: 0
+      patch_x:
+        range: integer
+        minimum_value: 0
+      patch_y:
+        range: integer
+        minimum_value: 0
+      patch_width:
+        range: integer
+        minimum_value: 1
+      patch_height:
+        range: integer
+        minimum_value: 1
+      split:
+        range: SplitName
+        required: true
+      status:
+        range: RecordStatus
+        required: true
+      annotation_type:
+        range: AnnotationType
+        exact_mappings:
+          - mifa:annotation_type
+      created_at:
+        range: datetime
+        slot_uri: pav:authoredOn
+        exact_mappings:
+          - mifa:annotation_creation_time
+      updated_at:
+        range: datetime
+        slot_uri: pav:lastUpdateOn
+      session:
+        description: id of the session (in the set) that last saved this annotation.
+        range: integer
+        minimum_value: 0
+      input_file:
+        description: Path of the annotated image region, relative to the set's folder.
+      mask_file:
+        description: Path of the mask, relative to the set's folder.
+      input_digest:
+        range: PixelDigest
+      mask_digest:
+        range: PixelDigest
+      input_iscc:
+        range: IsccCode
+      mask_iscc:
+        range: IsccCode
+      external_ids:
+        description: >-
+          Identifiers of copies in other systems as a JSON object, e.g.
+          {"omero_roi":"123","omero_label_image":"456"}.
+    rules:
+      - description: An excluded annotation has no mask.
+        preconditions:
+          slot_conditions:
+            status:
+              equals_string: excluded
+        postconditions:
+          slot_conditions:
+            mask_file:
+              value_presence: ABSENT
+      - description: A patch needs all four of x, y, width and height.
+        preconditions:
+          slot_conditions:
+            patch_x:
+              value_presence: PRESENT
+        postconditions:
+          slot_conditions:
+            patch_y:
+              value_presence: PRESENT
+            patch_width:
+              value_presence: PRESENT
+            patch_height:
+              value_presence: PRESENT
+      - description: A volumetric annotation needs z_start and z_end.
+        preconditions:
+          slot_conditions:
+            z_start:
+              value_presence: PRESENT
+        postconditions:
+          slot_conditions:
+            z_end:
+              value_presence: PRESENT
+
+types:
+
+  PixelDigest:
+    typeof: string
+    description: >-
+      Pixel SHA-256 - lowercase hex SHA-256 of the UTF-8 text '<dtype>|<shape>|'
+      followed by the pixel values in C order, little-endian. <dtype> is the NumPy
+      dtype string with '<' byte order (e.g. '<u2', '|u1'), <shape> the Python tuple
+      text (e.g. '(512, 512)'). Independent of file format and compression.
+    pattern: "^[0-9a-f]{64}$"
+
+  IsccCode:
+    typeof: string
+    description: ISCC Image-Code (ISO 24138), for finding near-duplicate images.
+    pattern: "^ISCC:[A-Z2-7]+$"
+
+enums:
+
+  AnnotationType:
+    description: Same values as MIFA's AnnotationType.
+    enum_uri: mifa:AnnotationType
+    permissible_values:
+      class_labels:
+        meaning: mifa:class_labels
+      bounding_boxes:
+        meaning: mifa:bounding_boxes
+      counts:
+        meaning: mifa:counts
+      derived_annotations:
+        meaning: mifa:derived_annotations
+      geometrical_annotations:
+        meaning: mifa:geometrical_annotations
+      graphs:
+        meaning: mifa:graphs
+      point_annotations:
+        meaning: mifa:point_annotations
+      segmentation_mask:
+        meaning: mifa:segmentation_mask
+      tracks:
+        meaning: mifa:tracks
+      weak_annotations:
+        meaning: mifa:weak_annotations
+      other:
+        meaning: mifa:other
+
+  MaskKind:
+    permissible_values:
+      instance:
+        description: Each object has its own pixel value.
+      semantic:
+        description: Each class has its own pixel value (see AnnotationClass.label_value).
+
+  AnnotationMethod:
+    permissible_values:
+      manual:
+      semi_automatic:
+      automatic:
+
+  Coverage:
+    permissible_values:
+      all:
+      representative:
+      partial:
+
+  ToolMode:
+    permissible_values:
+      automatic:
+      interactive:
+      human_in_the_loop:
+
+  SelectionMode:
+    permissible_values:
+      all:
+      random:
+      specific:
+
+  SplitStrategy:
+    permissible_values:
+      random_split:
+      expert_review:
+      cross_validation:
+
+  NormalizationMethod:
+    permissible_values:
+      percentile:
+        description: Per-image percentile bounds mapped to [0, 1].
+      none:
+        description: Raw intensities.
+
+  SessionKind:
+    permissible_values:
+      annotate:
+      review:
+
+  SessionStatus:
+    permissible_values:
+      open:
+      finished:
+      interrupted:
+
+  SplitName:
+    permissible_values:
+      training:
+      validation:
+      test:
+
+  RecordStatus:
+    permissible_values:
+      pending:
+        description: Not yet annotated.
+      annotated:
+        description: Annotation saved.
+      excluded:
+        description: Looked at and left out (e.g. out of focus); no mask, not used for training.

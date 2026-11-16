@@ -1,0 +1,1453 @@
+{
+  "$defs": {
+    "AnnotationClass": {
+      "additionalProperties": false,
+      "description": "One annotation class.",
+      "properties": {
+        "color": {
+          "pattern": "^#[0-9A-Fa-f]{6}$",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "label_value": {
+          "description": "Pixel value of the class in semantic masks. Not used for instance masks, where each object has its own value.",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "ontology_term": {
+          "description": "IRI of an ontology term for the class, e.g. a CL or GO term.",
+          "format": "uri",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "AnnotationClass",
+      "type": "object"
+    },
+    "AnnotationMethod": {
+      "description": "",
+      "enum": [
+        "manual",
+        "semi_automatic",
+        "automatic"
+      ],
+      "title": "AnnotationMethod",
+      "type": "string"
+    },
+    "AnnotationRecord": {
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "excluded"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "not": {
+              "required": [
+                "mask_file"
+              ]
+            },
+            "properties": {
+              "mask_file": {}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "patch_x": {}
+            },
+            "required": [
+              "patch_x"
+            ]
+          },
+          "then": {
+            "properties": {
+              "patch_height": {},
+              "patch_width": {},
+              "patch_y": {}
+            },
+            "required": [
+              "patch_y",
+              "patch_width",
+              "patch_height"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "z_start": {}
+            },
+            "required": [
+              "z_start"
+            ]
+          },
+          "then": {
+            "properties": {
+              "z_end": {}
+            },
+            "required": [
+              "z_end"
+            ]
+          }
+        }
+      ],
+      "description": "One annotation of a set: the image region it covers, its split, its state and its files. Flat, so a table of records is a CSV file with one column per field (well_metadata and external_ids as JSON text).",
+      "properties": {
+        "annotation_id": {
+          "description": "Identifier of the annotation, unique within the set. Files are named after it.",
+          "type": "string"
+        },
+        "annotation_type": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AnnotationType"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "channel": {
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "created_at": {
+          "format": "date-time",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "external_ids": {
+          "description": "Identifiers of copies in other systems as a JSON object, e.g. {\"omero_roi\":\"123\",\"omero_label_image\":\"456\"}.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "field": {
+          "description": "Field (well sample) within the well.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "image_name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "image_uri": {
+          "description": "The source image - omero:image:<id>, an http(s) URL of an OME-Zarr image, or another resolvable URI.",
+          "type": "string"
+        },
+        "input_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "input_file": {
+          "description": "Path of the annotated image region, relative to the set's folder.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "input_iscc": {
+          "pattern": "^ISCC:[A-Z2-7]+$",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "level": {
+          "description": "Multiscale level the coordinates refer to (0 = full resolution).",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "mask_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "mask_file": {
+          "description": "Path of the mask, relative to the set's folder.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "mask_iscc": {
+          "pattern": "^ISCC:[A-Z2-7]+$",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "patch_height": {
+          "minimum": 1,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "patch_width": {
+          "minimum": 1,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "patch_x": {
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "patch_y": {
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "session": {
+          "description": "id of the session (in the set) that last saved this annotation.",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "split": {
+          "$ref": "#/$defs/SplitName"
+        },
+        "status": {
+          "$ref": "#/$defs/RecordStatus"
+        },
+        "timepoint": {
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "updated_at": {
+          "format": "date-time",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "well": {
+          "description": "Plate well, e.g. B2.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "well_metadata": {
+          "description": "Key-value metadata of the well as a JSON object, e.g. {\"cell_line\":\"U2OS\"}.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "z_end": {
+          "description": "Last z-slice of a volumetric annotation (inclusive).",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "z_slice": {
+          "description": "Z-slice of a 2D annotation.",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "z_start": {
+          "description": "First z-slice of a volumetric annotation.",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "annotation_id",
+        "image_uri",
+        "split",
+        "status"
+      ],
+      "title": "AnnotationRecord",
+      "type": "object"
+    },
+    "AnnotationSet": {
+      "additionalProperties": false,
+      "description": "A set of image annotations for AI: one document per set. The annotations themselves are AnnotationRecords, usually kept as a CSV table next to it.",
+      "properties": {
+        "authors": {
+          "items": {
+            "$ref": "#/$defs/Person"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "classes": {
+          "description": "The annotation classes (e.g. nucleus, cell, background).",
+          "items": {
+            "$ref": "#/$defs/AnnotationClass"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "created": {
+          "description": "When the set was created.",
+          "format": "date-time",
+          "type": "string"
+        },
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "extensions": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Any"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Tool- or project-specific metadata this schema does not cover, under a namespace key such as the tool name."
+        },
+        "keywords": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "license": {
+          "description": "License of the annotations, preferably an SPDX identifier (CC-BY-4.0, CC0-1.0).",
+          "type": "string"
+        },
+        "methodology": {
+          "$ref": "#/$defs/Methodology"
+        },
+        "name": {
+          "description": "Short name of the set.",
+          "type": "string"
+        },
+        "normalization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Normalization"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "notes": {
+          "description": "Free text - context, caveats, known issues.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "sampling": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Sampling"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "schema_version": {
+          "description": "Version of this schema the document follows (semantic versioning).",
+          "pattern": "^0\\.1\\.[0-9]+$",
+          "type": "string"
+        },
+        "sessions": {
+          "description": "Annotation sessions, oldest first. Records refer to them by id.",
+          "items": {
+            "$ref": "#/$defs/Session"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "source_dataset": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourceDataset"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "split": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Split"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "study": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Study"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "schema_version",
+        "name",
+        "created",
+        "license",
+        "methodology"
+      ],
+      "title": "AnnotationSet",
+      "type": "object"
+    },
+    "AnnotationType": {
+      "description": "Same values as MIFA's AnnotationType.",
+      "enum": [
+        "class_labels",
+        "bounding_boxes",
+        "counts",
+        "derived_annotations",
+        "geometrical_annotations",
+        "graphs",
+        "point_annotations",
+        "segmentation_mask",
+        "tracks",
+        "weak_annotations",
+        "other"
+      ],
+      "title": "AnnotationType",
+      "type": "string"
+    },
+    "Any": {
+      "additionalProperties": true,
+      "description": "Any value.",
+      "title": "Any",
+      "type": [
+        "null",
+        "boolean",
+        "object",
+        "number",
+        "string"
+      ]
+    },
+    "Coverage": {
+      "description": "",
+      "enum": [
+        "all",
+        "representative",
+        "partial"
+      ],
+      "title": "Coverage",
+      "type": "string"
+    },
+    "MaskKind": {
+      "description": "",
+      "enum": [
+        "instance",
+        "semantic"
+      ],
+      "title": "MaskKind",
+      "type": "string"
+    },
+    "Methodology": {
+      "additionalProperties": false,
+      "description": "How the annotations were made.",
+      "properties": {
+        "annotation_types": {
+          "items": {
+            "$ref": "#/$defs/AnnotationType"
+          },
+          "type": "array"
+        },
+        "confidence_level": {
+          "description": "Confidence in the annotations' accuracy, e.g. annotator experience or inter-annotator agreement.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "coverage": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Coverage"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Within an annotated region, whether all objects are annotated, a representative selection, or only some."
+        },
+        "coverage_description": {
+          "description": "Which images were annotated and what share of the dataset, in words.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "criteria": {
+          "description": "What counts as an object and where its boundary is, in words.",
+          "type": "string"
+        },
+        "mask_kind": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MaskKind"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "For segmentation masks - one value per object (instance) or per class (semantic)."
+        },
+        "method": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AnnotationMethod"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "method_description": {
+          "description": "How the annotations were created, in words: who, which software, consensus and quality checks.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "overview": {
+          "description": "Short summary of the type of annotation and how it was made.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "tools": {
+          "items": {
+            "$ref": "#/$defs/Tool"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "annotation_types",
+        "criteria"
+      ],
+      "title": "Methodology",
+      "type": "object"
+    },
+    "Model": {
+      "additionalProperties": false,
+      "description": "An AI model that proposed annotations.",
+      "properties": {
+        "doi": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "url": {
+          "format": "uri",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "Model",
+      "type": "object"
+    },
+    "Normalization": {
+      "additionalProperties": false,
+      "description": "Intensity normalisation intended for model input.",
+      "properties": {
+        "clip": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "method": {
+          "$ref": "#/$defs/NormalizationMethod"
+        },
+        "percentile_high": {
+          "maximum": 100,
+          "minimum": 0,
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "percentile_low": {
+          "maximum": 100,
+          "minimum": 0,
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "method"
+      ],
+      "title": "Normalization",
+      "type": "object"
+    },
+    "NormalizationMethod": {
+      "description": "",
+      "enum": [
+        "percentile",
+        "none"
+      ],
+      "title": "NormalizationMethod",
+      "type": "string"
+    },
+    "Patches": {
+      "additionalProperties": false,
+      "description": "Present if annotations cover patches rather than whole planes.",
+      "properties": {
+        "height": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "per_image": {
+          "minimum": 1,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "random": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "width": {
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "width",
+        "height"
+      ],
+      "title": "Patches",
+      "type": "object"
+    },
+    "Person": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "affiliation": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "email": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "orcid": {
+          "description": "ORCID iD as URL.",
+          "pattern": "^https://orcid\\.org/[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9X]$",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "Person",
+      "type": "object"
+    },
+    "PlaneSelection": {
+      "additionalProperties": false,
+      "description": "Which timepoints or z-slices were annotated.",
+      "properties": {
+        "mode": {
+          "$ref": "#/$defs/SelectionMode"
+        },
+        "n": {
+          "description": "How many were drawn, for mode 'random'.",
+          "minimum": 1,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "values": {
+          "description": "The indices, for mode 'specific'.",
+          "items": {
+            "type": "integer"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "mode"
+      ],
+      "title": "PlaneSelection",
+      "type": "object"
+    },
+    "RecordStatus": {
+      "description": "",
+      "enum": [
+        "pending",
+        "annotated",
+        "excluded"
+      ],
+      "title": "RecordStatus",
+      "type": "string"
+    },
+    "Sampling": {
+      "additionalProperties": false,
+      "description": "Which parts of the images were annotated. Per-annotation detail is in the records.",
+      "properties": {
+        "input_channels": {
+          "description": "Channels meant as model input; may differ from label_channel (annotate on a nuclear stain, train on brightfield).",
+          "items": {
+            "type": "integer"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "label_channel": {
+          "description": "Channel the annotations were drawn on.",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "patches": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Patches"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "timepoints": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PlaneSelection"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "volumetric": {
+          "description": "True if annotations are 3D volumes rather than 2D planes.",
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "z_slices": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PlaneSelection"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "title": "Sampling",
+      "type": "object"
+    },
+    "SelectionMode": {
+      "description": "",
+      "enum": [
+        "all",
+        "random",
+        "specific"
+      ],
+      "title": "SelectionMode",
+      "type": "string"
+    },
+    "Session": {
+      "additionalProperties": false,
+      "description": "One annotation session - who, when, with what, and a note.",
+      "properties": {
+        "annotator": {
+          "description": "Who annotated - a name, ORCID or pseudonym.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "ended": {
+          "format": "date-time",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "id": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "kind": {
+          "$ref": "#/$defs/SessionKind",
+          "description": "'annotate' creates annotations, 'review' checks or corrects them."
+        },
+        "model": {
+          "description": "Name of the AI model used in the session, if any.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "n_annotated": {
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "note": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "software": {
+          "description": "Software and version, e.g. 'omero-annotate-ai 0.5.0'.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "started": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "status": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SessionStatus"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "started"
+      ],
+      "title": "Session",
+      "type": "object"
+    },
+    "SessionKind": {
+      "description": "",
+      "enum": [
+        "annotate",
+        "review"
+      ],
+      "title": "SessionKind",
+      "type": "string"
+    },
+    "SessionStatus": {
+      "description": "",
+      "enum": [
+        "open",
+        "finished",
+        "interrupted"
+      ],
+      "title": "SessionStatus",
+      "type": "string"
+    },
+    "SourceDataset": {
+      "additionalProperties": false,
+      "description": "The image dataset the annotated images come from.",
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "identifier": {
+          "description": "Accession or DOI, e.g. S-BIAD123 or idr0001.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "license": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "url": {
+          "format": "uri",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "description"
+      ],
+      "title": "SourceDataset",
+      "type": "object"
+    },
+    "Split": {
+      "additionalProperties": false,
+      "description": "How annotations were divided over training, validation and test.",
+      "properties": {
+        "rationale": {
+          "description": "Why this unit, e.g. 'fields within a well do not overlap'.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "seed": {
+          "description": "Seed of the random choices, to reproduce the selection with the same tool.",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "strategy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SplitStrategy"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "stratify_by": {
+          "description": "Metadata keys the split was balanced on (e.g. cell_line, treatment).",
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "unit": {
+          "description": "Level at which data are assigned to a split; all annotations of one unit share a split. 'image' or 'well', or another level named by the tool.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "title": "Split",
+      "type": "object"
+    },
+    "SplitName": {
+      "description": "",
+      "enum": [
+        "training",
+        "validation",
+        "test"
+      ],
+      "title": "SplitName",
+      "type": "string"
+    },
+    "SplitStrategy": {
+      "description": "",
+      "enum": [
+        "random_split",
+        "expert_review",
+        "cross_validation"
+      ],
+      "title": "SplitStrategy",
+      "type": "string"
+    },
+    "Study": {
+      "additionalProperties": false,
+      "description": "Biological and experimental context of the images.",
+      "properties": {
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "funding_statement": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "imaging_method": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "organism": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "title"
+      ],
+      "title": "Study",
+      "type": "object"
+    },
+    "Tool": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "mode": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ToolMode"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "model": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Model"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "parameters": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Any"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "Tool",
+      "type": "object"
+    },
+    "ToolMode": {
+      "description": "",
+      "enum": [
+        "automatic",
+        "interactive",
+        "human_in_the_loop"
+      ],
+      "title": "ToolMode",
+      "type": "string"
+    }
+  },
+  "$id": "https://w3id.org/bioimage-annotation-schema",
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "excluded"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "not": {
+          "required": [
+            "mask_file"
+          ]
+        },
+        "properties": {
+          "mask_file": {}
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "patch_x": {}
+        },
+        "required": [
+          "patch_x"
+        ]
+      },
+      "then": {
+        "properties": {
+          "patch_height": {},
+          "patch_width": {},
+          "patch_y": {}
+        },
+        "required": [
+          "patch_y",
+          "patch_width",
+          "patch_height"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "z_start": {}
+        },
+        "required": [
+          "z_start"
+        ]
+      },
+      "then": {
+        "properties": {
+          "z_end": {}
+        },
+        "required": [
+          "z_end"
+        ]
+      }
+    }
+  ],
+  "description": "One annotation of a set: the image region it covers, its split, its state and its files. Flat, so a table of records is a CSV file with one column per field (well_metadata and external_ids as JSON text).",
+  "metamodel_version": "1.12.0",
+  "properties": {
+    "annotation_id": {
+      "description": "Identifier of the annotation, unique within the set. Files are named after it.",
+      "type": "string"
+    },
+    "annotation_type": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AnnotationType"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "channel": {
+      "minimum": 0,
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "created_at": {
+      "format": "date-time",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "external_ids": {
+      "description": "Identifiers of copies in other systems as a JSON object, e.g. {\"omero_roi\":\"123\",\"omero_label_image\":\"456\"}.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "field": {
+      "description": "Field (well sample) within the well.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "image_name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "image_uri": {
+      "description": "The source image - omero:image:<id>, an http(s) URL of an OME-Zarr image, or another resolvable URI.",
+      "type": "string"
+    },
+    "input_digest": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "input_file": {
+      "description": "Path of the annotated image region, relative to the set's folder.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "input_iscc": {
+      "pattern": "^ISCC:[A-Z2-7]+$",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "level": {
+      "description": "Multiscale level the coordinates refer to (0 = full resolution).",
+      "minimum": 0,
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "mask_digest": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "mask_file": {
+      "description": "Path of the mask, relative to the set's folder.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "mask_iscc": {
+      "pattern": "^ISCC:[A-Z2-7]+$",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "patch_height": {
+      "minimum": 1,
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "patch_width": {
+      "minimum": 1,
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "patch_x": {
+      "minimum": 0,
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "patch_y": {
+      "minimum": 0,
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "session": {
+      "description": "id of the session (in the set) that last saved this annotation.",
+      "minimum": 0,
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "split": {
+      "$ref": "#/$defs/SplitName"
+    },
+    "status": {
+      "$ref": "#/$defs/RecordStatus"
+    },
+    "timepoint": {
+      "minimum": 0,
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "updated_at": {
+      "format": "date-time",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "well": {
+      "description": "Plate well, e.g. B2.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "well_metadata": {
+      "description": "Key-value metadata of the well as a JSON object, e.g. {\"cell_line\":\"U2OS\"}.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "z_end": {
+      "description": "Last z-slice of a volumetric annotation (inclusive).",
+      "minimum": 0,
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "z_slice": {
+      "description": "Z-slice of a 2D annotation.",
+      "minimum": 0,
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "z_start": {
+      "description": "First z-slice of a volumetric annotation.",
+      "minimum": 0,
+      "type": [
+        "integer",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "annotation_id",
+    "image_uri",
+    "split",
+    "status"
+  ],
+  "title": "bioimage_annotation_schema",
+  "type": "object",
+  "version": "0.1.0"
+}
+

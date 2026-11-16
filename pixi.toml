@@ -1,0 +1,22 @@
+[workspace]
+name = "bioimage-annotation-schema"
+channels = ["conda-forge"]
+platforms = ["linux-64", "osx-arm64", "osx-64", "win-64"]
+
+[dependencies]
+python = "3.12.*"
+linkml = ">=1.9"
+pydantic = ">=2"
+pytest = "*"
+pyyaml = "*"
+jsonschema = "*"
+
+[tasks]
+gen-json-set = "gen-json-schema --top-class AnnotationSet --indent 2 src/linkml/bioimage_annotation_schema.yaml > schema/0.1/annotation-set.schema.json"
+gen-json-record = "gen-json-schema --top-class AnnotationRecord --indent 2 src/linkml/bioimage_annotation_schema.yaml > schema/0.1/annotation-record.schema.json"
+gen-pydantic = "gen-pydantic src/linkml/bioimage_annotation_schema.yaml > src/bioimage_annotation_schema/datamodel.py"
+gen = { depends-on = ["gen-json-set", "gen-json-record", "gen-pydantic"] }
+test = "pytest tests -v"
+
+[pypi-dependencies]
+bioimage-annotation-schema = { path = ".", editable = true }

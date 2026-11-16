@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: If you use this schema, please cite it as below.
+title: Bioimage Annotation Schema
+type: dataset
+version: 0.1.0
+license: CC-BY-4.0
+repository-code: https://github.com/Leiden-Cell-Observatory/bioimage-annotation-schema
+authors:
+  - given-names: Maarten
+    family-names: Paul
+    affiliation: Leiden University
+    # orcid: https://orcid.org/XXXX-XXXX-XXXX-XXXX
+keywords:
+  - bioimage
+  - annotation
+  - FAIR
+  - training data
+  - MIFA
+  - LinkML
