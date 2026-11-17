@@ -11,6 +11,8 @@ pytest = "*"
 pyyaml = "*"
 jsonschema = "*"
 hatchling = "*"
+marimo = "*"
+polars = "*"
 
 [tasks]
 gen-json-set = "gen-json-schema --top-class AnnotationSet --indent 2 src/bioimage_annotation_schema/schema/bioimage_annotation_schema.yaml > src/bioimage_annotation_schema/schema/0.1/annotation-set.schema.json"
@@ -18,6 +20,7 @@ gen-json-record = "gen-json-schema --top-class AnnotationRecord --indent 2 src/b
 gen-pydantic = "gen-pydantic src/bioimage_annotation_schema/schema/bioimage_annotation_schema.yaml > src/bioimage_annotation_schema/datamodel.py"
 gen = { depends-on = ["gen-json-set", "gen-json-record", "gen-pydantic"] }
 test = "pytest tests -v"
+tour = "marimo edit notebooks/tour.py"
 
 [pypi-dependencies]
 bia-mifa-models = { git = "https://github.com/BioImage-Archive/bia-mifa-models.git", tag = "v1.1.5" }

@@ -31,6 +31,11 @@ annotation_input/…           # files the records point to (input_file, mask_fi
 annotation_output/…
 ```
 
+## Try it
+
+`pixi run tour` opens [`notebooks/tour.py`](notebooks/tour.py), a hands-on marimo walk
+through reading, breaking, building and exporting a set.
+
 ## Use
 
 ```bash
