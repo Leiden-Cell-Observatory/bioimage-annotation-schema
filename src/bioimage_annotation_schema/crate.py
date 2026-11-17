@@ -192,16 +192,18 @@ def _authors(graph: _Graph, annotation_set: AnnotationSet) -> list[dict[str, str
         person: Entity = {
             "@id": author.orcid or f"#author-{i}",
             "@type": "Person",
-            "name": author.name,
+            "name": f"{author.first_name} {author.last_name}",
+            "givenName": author.first_name,
+            "familyName": author.last_name,
         }
-        if author.affiliation:
-            person["affiliation"] = graph.add(
-                {
-                    "@id": _local_id("org", author.affiliation),
-                    "@type": "Organization",
-                    "name": author.affiliation,
-                }
+        affiliations = [
+            graph.add(
+                {"@id": org.ror or _local_id("org", org.name), "@type": "Organization", "name": org.name}
             )
+            for org in author.affiliations or []
+        ]
+        if affiliations:
+            person["affiliation"] = affiliations
         authors.append(graph.add(person))
     return authors
 

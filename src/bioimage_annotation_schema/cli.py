@@ -16,7 +16,9 @@ from .io import SchemaError, read_records, read_set
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="bas", description=__doc__.splitlines()[0])
     commands = parser.add_subparsers(dest="command", required=True)
-    commands.add_parser("validate", help="check a set's documents").add_argument("folder", type=Path)
+    validate = commands.add_parser("validate", help="check a set's documents")
+    validate.add_argument("folder", type=Path)
+    validate.add_argument("--mifa", action="store_true", help="also check MIFA's required fields")
     commands.add_parser("ro-crate", help="write ro-crate-metadata.json").add_argument("folder", type=Path)
     bia = commands.add_parser("bia", help="build a BioImage Archive bundle with MIFA metadata")
     bia.add_argument("folder", type=Path)
@@ -31,14 +33,25 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     if args.command == "validate":
         print(f"OK: {annotation_set.name}, {len(records)} records")
+        if args.mifa:
+            from .mifa import check_mifa
+
+            if missing := check_mifa(annotation_set):
+                print("Not ready for MIFA, missing:\n- " + "\n- ".join(missing), file=sys.stderr)
+                return 1
+            print("Ready for MIFA")
     elif args.command == "ro-crate":
         from .crate import write_ro_crate
 
         print(write_ro_crate(annotation_set, records, args.folder))
     else:
-        from .mifa import save_bia_package
+        from .mifa import MifaNotReady, save_bia_package
 
-        result = save_bia_package(annotation_set, records, args.folder, args.dest, accession=args.accession)
+        try:
+            result = save_bia_package(annotation_set, records, args.folder, args.dest, accession=args.accession)
+        except MifaNotReady as error:
+            print(error, file=sys.stderr)
+            return 1
         print(f"{result['dir']}: {result['n_annotations']} annotations, {result['copied']} files")
     return 0
 

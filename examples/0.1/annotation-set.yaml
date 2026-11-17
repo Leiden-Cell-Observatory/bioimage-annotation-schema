@@ -3,13 +3,33 @@ name: u2os-nuclei-hcs
 description: Nuclei in a U2OS high-content screen, annotated with micro-SAM for fine-tuning.
 created: "2026-11-10T14:02:00+01:00"
 license: CC-BY-4.0
+version: "1"
 authors:
-  - name: Jane Example
-    affiliation: Example University
+  - first_name: Jane
+    last_name: van Example
     orcid: https://orcid.org/0000-0002-1825-0097
+    affiliations:
+      - name: Example University
+        ror: https://ror.org/027bh9e22
+    roles: [annotator, data curator]
+links:
+  - url: https://github.com/example/u2os-nuclei
+    description: Analysis code
+ai_models_trained:
+  - https://doi.org/10.5281/zenodo.0000000
 keywords: [nuclei, segmentation, high-content screening]
 study:
   title: Nuclear morphology under drug treatment
+  description: U2OS cells treated with a compound library, imaged on a widefield HCS microscope.
+  funding_statement: This work was funded by the Example Research Council (grant ERC-123).
+  grants:
+    - id: ERC-123
+      funder: Example Research Council
+  publications:
+    - title: An example study of nuclear morphology
+      authors: J. van Example, A. Colleague
+      doi: https://doi.org/10.1000/example
+      year: 2026
   organism: Homo sapiens
   imaging_method: widefield fluorescence microscopy
 source_dataset:

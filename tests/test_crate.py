@@ -33,7 +33,9 @@ class TestRoCrate:
         assert root["name"] == "u2os-nuclei-hcs"
         assert root["conformsTo"] == {"@id": PROFILE}
         assert root["license"] == {"@id": "https://spdx.org/licenses/CC-BY-4.0"}
-        assert by_id["https://orcid.org/0000-0002-1825-0097"]["name"] == "Jane Example"
+        author = by_id["https://orcid.org/0000-0002-1825-0097"]
+        assert author["name"] == "Jane van Example"
+        assert author["affiliation"] == {"@id": "https://ror.org/027bh9e22"}
 
     def test_every_reference_is_defined(self, set_folder):
         _, by_id = _crate(set_folder)

@@ -37,6 +37,12 @@ class TestRejection:
             read_set(set_folder)
         assert any("methodology.coverag" in p for p in error.value.problems)
 
+    def test_licence_outside_the_archive_is_rejected(self, set_folder):
+        path = set_folder / "annotation-set.yaml"
+        path.write_text(path.read_text().replace("license: CC-BY-4.0", "license: MIT"))
+        with pytest.raises(SchemaError, match="license"):
+            read_set(set_folder)
+
     def test_wrong_schema_version_is_rejected(self, set_folder):
         path = set_folder / "annotation-set.yaml"
         path.write_text(path.read_text().replace('"0.1.0"', '"0.2.0"'))

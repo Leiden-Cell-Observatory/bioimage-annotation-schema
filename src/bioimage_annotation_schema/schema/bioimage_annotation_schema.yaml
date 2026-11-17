@@ -11,6 +11,7 @@ description: >-
 license: CC-BY-4.0
 see_also:
   - https://github.com/Leiden-Cell-Observatory/bioimage-annotation-schema
+  - https://bioimage-archive.github.io/bia-mifa-models/
 
 prefixes:
   bas: https://w3id.org/bioimage-annotation-schema/
@@ -52,11 +53,33 @@ classes:
         range: datetime
         slot_uri: schema:dateCreated
       license:
-        description: License of the annotations, preferably an SPDX identifier (CC-BY-4.0, CC0-1.0).
+        description: >-
+          License of the annotations. Only the two licences the BioImage Archive
+          accepts are allowed.
         required: true
+        range: License
         slot_uri: schema:license
-        close_mappings:
+        exact_mappings:
           - mifa:license
+      version:
+        description: Version of this set, e.g. "1" or "1.1".
+        exact_mappings:
+          - mifa:version
+      changes:
+        description: What changed since the previous version.
+        exact_mappings:
+          - mifa:changes
+      previous_version:
+        description: Identifier (DOI or URL) of the previous version of the set.
+        range: uriorcurie
+        exact_mappings:
+          - mifa:previous_version
+      ai_models_trained:
+        description: AI models trained on these annotations, by DOI or URL (e.g. a BioImage Model Zoo entry).
+        range: uriorcurie
+        multivalued: true
+        exact_mappings:
+          - mifa:ai_models_trained
       authors:
         range: Person
         multivalued: true
@@ -70,11 +93,10 @@ classes:
         exact_mappings:
           - mifa:keywords
       links:
-        description: Web pages about the set or its data, e.g. a repository or publication.
-        range: uri
+        description: Web pages about the set or its data, e.g. a repository or a project page.
+        range: Link
         multivalued: true
-        exact_mappings:
-          - mifa:link_url
+        inlined_as_list: true
       study:
         range: Study
         inlined: true
@@ -118,14 +140,20 @@ classes:
 
   Person:
     class_uri: schema:Person
-    close_mappings:
+    exact_mappings:
       - mifa:Author
     attributes:
-      name:
+      first_name:
         required: true
-        slot_uri: schema:name
-      affiliation:
-        slot_uri: schema:affiliation
+        slot_uri: schema:givenName
+        exact_mappings:
+          - mifa:author_first_name
+      last_name:
+        description: Family name, with particles such as "van der".
+        required: true
+        slot_uri: schema:familyName
+        exact_mappings:
+          - mifa:author_last_name
       orcid:
         description: ORCID iD as URL.
         pattern: "^https://orcid\\.org/[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9X]$"
@@ -135,6 +163,90 @@ classes:
         slot_uri: schema:email
         exact_mappings:
           - mifa:email
+      affiliations:
+        range: Organisation
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: schema:affiliation
+        exact_mappings:
+          - mifa:organisation
+      roles:
+        description: Roles in the work, e.g. annotator, data curator.
+        multivalued: true
+        exact_mappings:
+          - mifa:role
+
+  Organisation:
+    class_uri: schema:Organization
+    exact_mappings:
+      - mifa:OrganisationInfo
+    attributes:
+      name:
+        required: true
+        slot_uri: schema:name
+        exact_mappings:
+          - mifa:organisation_name
+      ror:
+        description: ROR identifier as URL, e.g. https://ror.org/027bh9e22.
+        pattern: "^https://ror\\.org/[0-9a-z]{9}$"
+        exact_mappings:
+          - mifa:ror_id
+      address:
+        exact_mappings:
+          - mifa:address
+
+  Link:
+    attributes:
+      url:
+        range: uri
+        required: true
+        slot_uri: schema:url
+        exact_mappings:
+          - mifa:link_url
+      description:
+        exact_mappings:
+          - mifa:link_description
+
+  Publication:
+    class_uri: schema:ScholarlyArticle
+    exact_mappings:
+      - mifa:Publications
+    attributes:
+      title:
+        required: true
+        exact_mappings:
+          - mifa:publication_title
+      authors:
+        description: Author list as written in the reference.
+        required: true
+        exact_mappings:
+          - mifa:publication_authors
+      doi:
+        description: DOI as URL, e.g. https://doi.org/10.1038/s41592-019-0612-7.
+        range: uriorcurie
+        exact_mappings:
+          - mifa:publication_doi
+      year:
+        range: integer
+        exact_mappings:
+          - mifa:publication_year
+      pubmed_id:
+        range: uriorcurie
+        exact_mappings:
+          - mifa:pubmed_id
+
+  Grant:
+    exact_mappings:
+      - mifa:GrantReference
+    attributes:
+      id:
+        required: true
+        exact_mappings:
+          - mifa:grant_id
+      funder:
+        required: true
+        exact_mappings:
+          - mifa:funder
 
   Study:
     description: Biological and experimental context of the images.
@@ -153,6 +265,21 @@ classes:
       funding_statement:
         exact_mappings:
           - mifa:funding_statement
+      publications:
+        range: Publication
+        multivalued: true
+        inlined_as_list: true
+        exact_mappings:
+          - mifa:publications
+      grants:
+        range: Grant
+        multivalued: true
+        inlined_as_list: true
+        exact_mappings:
+          - mifa:grants
+      acknowledgements:
+        exact_mappings:
+          - mifa:acknowledgements
 
   SourceDataset:
     description: The image dataset the annotated images come from.
@@ -206,6 +333,13 @@ classes:
         description: Which images were annotated and what share of the dataset, in words.
         exact_mappings:
           - mifa:annotation_coverage
+      annotators:
+        description: People who made or reviewed the annotations, if different from the set's authors.
+        range: Person
+        multivalued: true
+        inlined_as_list: true
+        exact_mappings:
+          - mifa:authors
       confidence_level:
         description: Confidence in the annotations' accuracy, e.g. annotator experience or inter-annotator agreement.
         exact_mappings:
@@ -482,6 +616,10 @@ classes:
         range: IsccCode
       mask_iscc:
         range: IsccCode
+      transformations:
+        description: Transformations needed to align the annotation with the source image, e.g. a rotation or crop.
+        exact_mappings:
+          - mifa:transformations
       external_ids:
         description: >-
           Identifiers of copies in other systems as a JSON object, e.g.
@@ -536,6 +674,13 @@ types:
     pattern: "^ISCC:[A-Z2-7]+$"
 
 enums:
+
+  License:
+    permissible_values:
+      CC-BY-4.0:
+        meaning: mifa:CC_BY
+      CC0-1.0:
+        meaning: mifa:CC0
 
   AnnotationType:
     description: Same values as MIFA's AnnotationType.

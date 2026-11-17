@@ -1,12 +1,22 @@
 """MIFA documents and the BioImage Archive bundle."""
 
 import csv
+import importlib.resources
+import subprocess
 
 import pytest
 import yaml
 
 from bioimage_annotation_schema import read_records, read_set
-from bioimage_annotation_schema.mifa import compose_method, map_license, save_bia_package, save_mifa
+from bioimage_annotation_schema.mifa import (
+    MifaNotReady,
+    check_mifa,
+    compose_method,
+    save_bia_package,
+    save_mifa,
+)
+
+MIFA_SCHEMA = importlib.resources.files("bia_mifa_models") / "schema" / "bia_mifa_models.yaml"
 
 
 class TestMifaDocuments:
@@ -30,10 +40,44 @@ class TestMifaDocuments:
         assert "micro-sam 1.8.0" in text and "vit_b_lm" in text
         assert "1 training, 1 validation, assigned per well" in text
 
-    def test_licence_outside_mifa_is_refused(self):
-        assert map_license("CC0-1.0") == "CC0"
-        with pytest.raises(ValueError):
-            map_license("MIT")
+    @pytest.mark.parametrize("key,target", [("study", "Study"), ("annotations", "Annotations"),
+                                            ("version", "Version")])
+    def test_documents_pass_mifa_own_validator(self, set_folder, tmp_path, key, target):
+        path = save_mifa(read_set(set_folder), read_records(set_folder), tmp_path)[key]
+        result = subprocess.run(
+            ["linkml-validate", "-s", str(MIFA_SCHEMA), "-C", target, str(path)],
+            capture_output=True, text=True,
+        )
+        assert result.returncode == 0, result.stdout + result.stderr
+
+    def test_every_recorded_fact_reaches_mifa(self, set_folder, tmp_path):
+        paths = save_mifa(read_set(set_folder), read_records(set_folder), tmp_path)
+        study = yaml.safe_load(paths["study"].read_text())
+        author = study["authors"][0]
+        assert (author["author_first_name"], author["author_last_name"]) == ("Jane", "van Example")
+        assert author["organisation"][0]["ror_id"] == "https://ror.org/027bh9e22"
+        assert study["grants"] == [{"grant_id": "ERC-123", "funder": "Example Research Council"}]
+        # LinkML writes publications keyed by their DOI; MIFA's year is text
+        publication = study["publications"]["https://doi.org/10.1000/example"]
+        assert (publication["publication_title"], publication["publication_year"]) == (
+            "An example study of nuclear morphology", "2026")
+        assert study["license"] == "CC_BY"
+        assert study["link_url"][0] == "https://github.com/example/u2os-nuclei"
+        assert study["ai_models_trained"] == ["https://doi.org/10.5281/zenodo.0000000"]
+        version = yaml.safe_load(paths["version"].read_text())
+        assert version["version"] == "1"
+        assert version["timestamp"].startswith("2026-11-10T15:20")  # session end
+
+    def test_missing_mifa_fields_are_named_not_invented(self, set_folder, tmp_path):
+        path = set_folder / "annotation-set.yaml"
+        data = yaml.safe_load(path.read_text())
+        del data["study"]["funding_statement"], data["keywords"], data["version"]
+        path.write_text(yaml.safe_dump(data))
+        annotation_set = read_set(set_folder)  # still a valid set
+        assert check_mifa(annotation_set) == ["study.funding_statement", "keywords", "version"]
+        with pytest.raises(MifaNotReady) as error:
+            save_mifa(annotation_set, read_records(set_folder), tmp_path)
+        assert "keywords" in error.value.missing
 
 
 class TestBiaBundle:

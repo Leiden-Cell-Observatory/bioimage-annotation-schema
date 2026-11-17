@@ -272,6 +272,13 @@
             "null"
           ]
         },
+        "transformations": {
+          "description": "Transformations needed to align the annotation with the source image, e.g. a rotation or crop.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "updated_at": {
           "format": "date-time",
           "type": [
@@ -331,12 +338,29 @@
       "additionalProperties": false,
       "description": "A set of image annotations for AI: one document per set. The annotations themselves are AnnotationRecords, usually kept as a CSV table next to it.",
       "properties": {
+        "ai_models_trained": {
+          "description": "AI models trained on these annotations, by DOI or URL (e.g. a BioImage Model Zoo entry).",
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
         "authors": {
           "items": {
             "$ref": "#/$defs/Person"
           },
           "type": [
             "array",
+            "null"
+          ]
+        },
+        "changes": {
+          "description": "What changed since the previous version.",
+          "type": [
+            "string",
             "null"
           ]
         },
@@ -382,14 +406,13 @@
           ]
         },
         "license": {
-          "description": "License of the annotations, preferably an SPDX identifier (CC-BY-4.0, CC0-1.0).",
-          "type": "string"
+          "$ref": "#/$defs/License",
+          "description": "License of the annotations. Only the two licences the BioImage Archive accepts are allowed."
         },
         "links": {
-          "description": "Web pages about the set or its data, e.g. a repository or publication.",
+          "description": "Web pages about the set or its data, e.g. a repository or a project page.",
           "items": {
-            "format": "uri",
-            "type": "string"
+            "$ref": "#/$defs/Link"
           },
           "type": [
             "array",
@@ -415,6 +438,13 @@
         },
         "notes": {
           "description": "Free text - context, caveats, known issues.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "previous_version": {
+          "description": "Identifier (DOI or URL) of the previous version of the set.",
           "type": [
             "string",
             "null"
@@ -474,6 +504,13 @@
               "type": "null"
             }
           ]
+        },
+        "version": {
+          "description": "Version of this set, e.g. \"1\" or \"1.1\".",
+          "type": [
+            "string",
+            "null"
+          ]
         }
       },
       "required": [
@@ -526,6 +563,54 @@
       "title": "Coverage",
       "type": "string"
     },
+    "Grant": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "funder": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "funder"
+      ],
+      "title": "Grant",
+      "type": "object"
+    },
+    "License": {
+      "description": "",
+      "enum": [
+        "CC-BY-4.0",
+        "CC0-1.0"
+      ],
+      "title": "License",
+      "type": "string"
+    },
+    "Link": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "url": {
+          "format": "uri",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "title": "Link",
+      "type": "object"
+    },
     "MaskKind": {
       "description": "",
       "enum": [
@@ -544,6 +629,16 @@
             "$ref": "#/$defs/AnnotationType"
           },
           "type": "array"
+        },
+        "annotators": {
+          "description": "People who made or reviewed the annotations, if different from the set's authors.",
+          "items": {
+            "$ref": "#/$defs/Person"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
         },
         "confidence_level": {
           "description": "Confidence in the annotations' accuracy, e.g. annotator experience or inter-annotator agreement.",
@@ -704,6 +799,34 @@
       "title": "NormalizationMethod",
       "type": "string"
     },
+    "Organisation": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "address": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "ror": {
+          "description": "ROR identifier as URL, e.g. https://ror.org/027bh9e22.",
+          "pattern": "^https://ror\\.org/[0-9a-z]{9}$",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "Organisation",
+      "type": "object"
+    },
     "Patches": {
       "additionalProperties": false,
       "description": "Present if annotations cover patches rather than whole planes.",
@@ -741,9 +864,12 @@
       "additionalProperties": false,
       "description": "",
       "properties": {
-        "affiliation": {
+        "affiliations": {
+          "items": {
+            "$ref": "#/$defs/Organisation"
+          },
           "type": [
-            "string",
+            "array",
             "null"
           ]
         },
@@ -753,7 +879,11 @@
             "null"
           ]
         },
-        "name": {
+        "first_name": {
+          "type": "string"
+        },
+        "last_name": {
+          "description": "Family name, with particles such as \"van der\".",
           "type": "string"
         },
         "orcid": {
@@ -763,10 +893,21 @@
             "string",
             "null"
           ]
+        },
+        "roles": {
+          "description": "Roles in the work, e.g. annotator, data curator.",
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
         }
       },
       "required": [
-        "name"
+        "first_name",
+        "last_name"
       ],
       "title": "Person",
       "type": "object"
@@ -801,6 +942,44 @@
         "mode"
       ],
       "title": "PlaneSelection",
+      "type": "object"
+    },
+    "Publication": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "authors": {
+          "description": "Author list as written in the reference.",
+          "type": "string"
+        },
+        "doi": {
+          "description": "DOI as URL, e.g. https://doi.org/10.1038/s41592-019-0612-7.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "pubmed_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "title": {
+          "type": "string"
+        },
+        "year": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "title",
+        "authors"
+      ],
+      "title": "Publication",
       "type": "object"
     },
     "RecordStatus": {
@@ -1089,6 +1268,12 @@
       "additionalProperties": false,
       "description": "Biological and experimental context of the images.",
       "properties": {
+        "acknowledgements": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "description": {
           "type": [
             "string",
@@ -1101,6 +1286,15 @@
             "null"
           ]
         },
+        "grants": {
+          "items": {
+            "$ref": "#/$defs/Grant"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
         "imaging_method": {
           "type": [
             "string",
@@ -1110,6 +1304,15 @@
         "organism": {
           "type": [
             "string",
+            "null"
+          ]
+        },
+        "publications": {
+          "items": {
+            "$ref": "#/$defs/Publication"
+          },
+          "type": [
+            "array",
             "null"
           ]
         },
@@ -1402,6 +1605,13 @@
       "minimum": 0,
       "type": [
         "integer",
+        "null"
+      ]
+    },
+    "transformations": {
+      "description": "Transformations needed to align the annotation with the source image, e.g. a rotation or crop.",
+      "type": [
+        "string",
         "null"
       ]
     },

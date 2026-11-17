@@ -6,6 +6,11 @@ A MIFA submission has three YAML documents: ``Study_<accession>.yaml``,
 ``Annotations_<accession>.yaml`` (with one record per annotation file) and
 ``Version_<accession>.yaml``.
 
+Only facts recorded in the set are written: if MIFA requires a field the set does
+not have (e.g. a funding statement), :func:`check_mifa` names it and the export
+refuses, rather than inventing a value. The free-text ``annotation_overview`` and
+``annotation_method`` are the set's own, or written from its structured fields.
+
 The documents are built with the upstream LinkML dataclasses, which check MIFA's
 required fields on construction and serialise to the exact submission YAML. That
 package is not on PyPI; install it with
@@ -21,16 +26,26 @@ import shutil
 import warnings
 from collections import Counter
 from collections.abc import Sequence
+from datetime import UTC
 from pathlib import Path
 from typing import Any
+
+import yaml
 
 from .datamodel import AnnotationRecord, AnnotationSet
 
 BUNDLE_IMAGE_DIR = "images"
 BUNDLE_ANNOTATION_DIR = "annotations"
 
-_LICENSES = {"CC-BY-4.0": "CC_BY", "CC-BY": "CC_BY", "CC_BY": "CC_BY",
-             "CC0-1.0": "CC0", "CC0": "CC0", "CC-0": "CC0"}
+_LICENSES = {"CC-BY-4.0": "CC_BY", "CC0-1.0": "CC0"}
+
+
+class MifaNotReady(ValueError):
+    """The set lacks fields MIFA requires; ``missing`` names them."""
+
+    def __init__(self, missing: Sequence[str]) -> None:
+        self.missing = list(missing)
+        super().__init__("Not ready for MIFA, missing:\n- " + "\n- ".join(missing))
 
 
 def _import_mifa() -> tuple[Any, Any]:
@@ -45,20 +60,34 @@ def _import_mifa() -> tuple[Any, Any]:
     return models, yaml_dumper
 
 
-def map_license(text: str) -> str:
-    """MIFA ``LicenseType`` code of an SPDX-like licence (only CC0 and CC BY exist)."""
-    if text.strip() in _LICENSES:
-        return _LICENSES[text.strip()]
-    raise ValueError(f"MIFA accepts only CC0 or CC BY licences, not {text!r}")
+def links(annotation_set: AnnotationSet) -> list[tuple[str, str | None]]:
+    """``(url, description)`` of the set's links, then its source dataset's URL."""
+    found = [(link.url, link.description) for link in annotation_set.links or []]
+    source = annotation_set.source_dataset
+    if source and source.url:
+        found.append((source.url, "Source image dataset"))
+    return found
 
 
-def split_author_name(name: str) -> tuple[str, str]:
-    """``(first, last)``; MIFA needs both, so a single name gets last name ``.``.
-
-    Surname particles ("van der") stay with the last name.
-    """
-    tokens = name.split()
-    return (tokens[0], " ".join(tokens[1:]) or ".")
+def check_mifa(annotation_set: AnnotationSet) -> list[str]:
+    """The fields MIFA requires that the set does not have (empty when ready)."""
+    study = annotation_set.study
+    missing = []
+    if not study:
+        missing.append("study (title, description, funding_statement)")
+    else:
+        missing += [
+            f"study.{name}"
+            for name in ("description", "funding_statement")
+            if not getattr(study, name)
+        ]
+    if not annotation_set.keywords:
+        missing.append("keywords")
+    if not links(annotation_set):
+        missing.append("links (or source_dataset.url)")
+    if not annotation_set.version:
+        missing.append("version")
+    return missing
 
 
 def annotated(records: Sequence[AnnotationRecord]) -> list[AnnotationRecord]:
@@ -160,19 +189,30 @@ def spatial_information(record: AnnotationRecord) -> str:
     return ",".join(bits) or "whole image"
 
 
-def _authors(models: Any, annotation_set: AnnotationSet) -> list[Any]:
+def _authors(models: Any, people: Sequence[Any] | None) -> list[Any]:
     authors = []
-    for author in annotation_set.authors or []:
-        first, last = split_author_name(author.name)
-        kwargs: dict[str, Any] = {"author_first_name": first, "author_last_name": last}
-        if author.email:
-            kwargs["email"] = author.email
-        if author.orcid:
-            kwargs["orcid_id"] = author.orcid
-        if author.affiliation:
-            kwargs["organisation"] = [models.OrganisationInfo(organisation_name=author.affiliation)]
-        authors.append(models.Author(**kwargs))
+    for person in people or []:
+        kwargs: dict[str, Any] = {
+            "author_first_name": person.first_name,
+            "author_last_name": person.last_name,
+            "email": person.email,
+            "orcid_id": person.orcid,
+            "role": person.roles,
+            "organisation": [
+                models.OrganisationInfo(organisation_name=o.name, ror_id=o.ror, address=o.address)
+                for o in person.affiliations or []
+            ],
+        }
+        authors.append(models.Author(**{k: v for k, v in kwargs.items() if v}))
     return authors
+
+
+def _version_timestamp(annotation_set: AnnotationSet) -> str:
+    """When this version was made: the newest session end, else the set's creation."""
+    times = [annotation_set.created]
+    times += [s.ended or s.started for s in annotation_set.sessions or []]
+    aware = [t if t.tzinfo else t.replace(tzinfo=UTC) for t in times]
+    return max(aware).isoformat()
 
 
 def to_mifa(
@@ -181,31 +221,41 @@ def to_mifa(
     *,
     file_ids: str = "bundle",
 ) -> dict[str, Any]:
-    """The three MIFA documents as upstream dataclasses: ``study``, ``annotations``,
-    ``version``. Only annotated records are listed.
+    """The three MIFA documents: ``study`` and ``annotations`` as upstream
+    dataclasses, ``version`` as plain data. Only annotated records are listed.
 
     ``file_ids``: ``"bundle"`` uses the file paths of :func:`save_bia_package`;
     ``"uri"`` uses each record's annotation_id and image_uri.
     """
+    if missing := check_mifa(annotation_set):
+        raise MifaNotReady(missing)
     models, _ = _import_mifa()
     study = annotation_set.study
-    links = [*(annotation_set.links or [])]
-    if annotation_set.source_dataset and annotation_set.source_dataset.url:
-        links.append(annotation_set.source_dataset.url)
-    if not links:
-        raise ValueError("MIFA needs at least one link: set 'links' or source_dataset.url")
-    authors = _authors(models, annotation_set)
-
+    assert study is not None  # check_mifa
+    urls = links(annotation_set)
+    study_fields = {
+        "authors": _authors(models, annotation_set.authors),
+        "publications": [
+            models.Publications(
+                publication_title=p.title, publication_authors=p.authors,
+                **{k: v for k, v in (("publication_doi", p.doi), ("publication_year", p.year),
+                                     ("pubmed_id", p.pubmed_id)) if v is not None},
+            )
+            for p in study.publications or []
+        ],
+        "grants": [models.GrantReference(grant_id=g.id, funder=g.funder) for g in study.grants or []],
+        "acknowledgements": study.acknowledgements,
+        "ai_models_trained": annotation_set.ai_models_trained,
+    }
     study_doc = models.Study(
-        title=study.title if study else annotation_set.name,
-        description=(study.description if study else None)
-        or annotation_set.description
-        or annotation_set.name,
-        keywords=annotation_set.keywords or ["bioimage annotation"],
-        license=map_license(annotation_set.license),
-        funding_statement=(study.funding_statement if study else None) or "Not specified.",
-        link_url=links,
-        **({"authors": authors} if authors else {}),
+        title=study.title,
+        description=study.description,
+        keywords=annotation_set.keywords,
+        license=_LICENSES[annotation_set.license],
+        funding_statement=study.funding_statement,
+        link_url=[url for url, _ in urls],
+        link_description=[d or "" for _, d in urls],
+        **{k: v for k, v in study_fields.items() if v},
     )
 
     meth = annotation_set.methodology
@@ -223,13 +273,15 @@ def to_mifa(
         }
         if record.created_at:
             kwargs["annotation_creation_time"] = record.created_at.isoformat()
+        if record.transformations:
+            kwargs["transformations"] = record.transformations
         file_metadata.append(models.FileLevelMetadata(**kwargs))
 
     optional = {
         "annotation_coverage": meth.coverage_description
         or (f"{meth.coverage} objects in the annotated regions" if meth.coverage else None),
         "annotation_confidence_level": meth.confidence_level,
-        "authors": authors or None,
+        "authors": _authors(models, meth.annotators or annotation_set.authors),
     }
     annotations_doc = models.Annotations(
         annotation_overview=compose_overview(annotation_set),
@@ -238,7 +290,14 @@ def to_mifa(
         file_metadata=file_metadata,
         **{k: v for k, v in optional.items() if v},
     )
-    version_doc = models.Version(version=1.0, timestamp=annotation_set.created.isoformat())
+    # Plain data, not models.Version: in bia-mifa-models 1.1.5 the generated class
+    # turns version into a float, while MIFA's schema (and validator) want a string.
+    version_doc = {
+        "version": str(annotation_set.version),
+        "timestamp": _version_timestamp(annotation_set),
+        **{k: v for k, v in (("changes", annotation_set.changes),
+                             ("previous_version", annotation_set.previous_version)) if v},
+    }
     return {"study": study_doc, "annotations": annotations_doc, "version": version_doc}
 
 
@@ -265,8 +324,10 @@ def save_mifa(
     docs = to_mifa(annotation_set, records, file_ids=file_ids)
     paths = {}
     for key, class_name in (("study", "Study"), ("annotations", "Annotations"), ("version", "Version")):
+        doc = docs[key]
+        text = yaml.safe_dump(doc, sort_keys=False) if isinstance(doc, dict) else yaml_dumper.dumps(doc)
         paths[key] = directory / f"{class_name}_{accession}.yaml"
-        paths[key].write_text(yaml_dumper.dumps(docs[key]), encoding="utf-8")
+        paths[key].write_text(text, encoding="utf-8")
     return paths
 
 

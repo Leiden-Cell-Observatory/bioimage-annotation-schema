@@ -40,6 +40,7 @@ through reading, breaking, building and exporting a set.
 
 ```bash
 bas validate my-set/             # check both documents
+bas validate --mifa my-set/      # also list what MIFA still needs (funding, keywords, …)
 bas ro-crate my-set/             # write my-set/ro-crate-metadata.json
 bas bia my-set/ bia-bundle/      # BioImage Archive bundle: MIFA YAML, file lists, data
 ```
@@ -55,6 +56,11 @@ write_ro_crate(annotation_set, records, "my-set")
 
 Any JSON Schema validator works too, as does
 `linkml-validate -s <schema yaml> -C AnnotationSet annotation-set.yaml`.
+
+Every MIFA field has a place in the schema. The MIFA export writes only what the set
+records: when MIFA requires something the set lacks, the export names it and stops,
+rather than filling in a placeholder. The written documents pass MIFA's own
+`linkml-validate` check.
 
 The MIFA export needs `bia-mifa-models`, which is not on PyPI:
 `pip install "git+https://github.com/BioImage-Archive/bia-mifa-models.git@v1.1.5"`.

@@ -91,7 +91,8 @@ linkml_meta = LinkMLMeta({'default_prefix': 'bas',
                            'prefix_reference': 'http://www.w3.org/ns/prov#'},
                   'schema': {'prefix_prefix': 'schema',
                              'prefix_reference': 'http://schema.org/'}},
-     'see_also': ['https://github.com/Leiden-Cell-Observatory/bioimage-annotation-schema'],
+     'see_also': ['https://github.com/Leiden-Cell-Observatory/bioimage-annotation-schema',
+                  'https://bioimage-archive.github.io/bia-mifa-models/'],
      'source_file': 'src/bioimage_annotation_schema/schema/bioimage_annotation_schema.yaml',
      'title': 'Bioimage Annotation Schema',
      'types': {'IsccCode': {'description': 'ISCC Image-Code (ISO 24138), for '
@@ -114,6 +115,11 @@ linkml_meta = LinkMLMeta({'default_prefix': 'bas',
                                'name': 'PixelDigest',
                                'pattern': '^[0-9a-f]{64}$',
                                'typeof': 'string'}}} )
+
+class License(str, Enum):
+    CC_BY_4FULL_STOP0 = "CC-BY-4.0"
+    CC0_1FULL_STOP0 = "CC0-1.0"
+
 
 class AnnotationType(str, Enum):
     """
@@ -227,21 +233,34 @@ class AnnotationSet(ConfiguredBaseModel):
          'tree_root': True})
 
     schema_version: str = Field(default=..., description="""Version of this schema the document follows (semantic versioning).""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet']} })
-    name: str = Field(default=..., description="""Short name of the set.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet', 'Person', 'Tool', 'Model', 'AnnotationClass'],
+    name: str = Field(default=..., description="""Short name of the set.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet',
+                       'Organisation',
+                       'Tool',
+                       'Model',
+                       'AnnotationClass'],
          'slot_uri': 'schema:name'} })
-    description: Optional[str] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet', 'Study', 'SourceDataset', 'AnnotationClass'],
+    description: Optional[str] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet',
+                       'Link',
+                       'Study',
+                       'SourceDataset',
+                       'AnnotationClass'],
          'slot_uri': 'schema:description'} })
     created: datetime  = Field(default=..., description="""When the set was created.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet'], 'slot_uri': 'schema:dateCreated'} })
-    license: str = Field(default=..., description="""License of the annotations, preferably an SPDX identifier (CC-BY-4.0, CC0-1.0).""", json_schema_extra = { "linkml_meta": {'close_mappings': ['mifa:license'],
-         'domain_of': ['AnnotationSet', 'SourceDataset'],
+    license: License = Field(default=..., description="""License of the annotations. Only the two licences the BioImage Archive accepts are allowed.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet', 'SourceDataset'],
+         'exact_mappings': ['mifa:license'],
          'slot_uri': 'schema:license'} })
-    authors: Optional[list[Person]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet'],
+    version: Optional[str] = Field(default=None, description="""Version of this set, e.g. \"1\" or \"1.1\".""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet', 'Tool', 'Model'],
+         'exact_mappings': ['mifa:version']} })
+    changes: Optional[str] = Field(default=None, description="""What changed since the previous version.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet'], 'exact_mappings': ['mifa:changes']} })
+    previous_version: Optional[str] = Field(default=None, description="""Identifier (DOI or URL) of the previous version of the set.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet'], 'exact_mappings': ['mifa:previous_version']} })
+    ai_models_trained: Optional[list[str]] = Field(default=None, description="""AI models trained on these annotations, by DOI or URL (e.g. a BioImage Model Zoo entry).""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet'], 'exact_mappings': ['mifa:ai_models_trained']} })
+    authors: Optional[list[Person]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet', 'Publication'],
          'exact_mappings': ['mifa:author'],
          'slot_uri': 'schema:author'} })
     keywords: Optional[list[str]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet'],
          'exact_mappings': ['mifa:keywords'],
          'slot_uri': 'schema:keywords'} })
-    links: Optional[list[str]] = Field(default=None, description="""Web pages about the set or its data, e.g. a repository or publication.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet'], 'exact_mappings': ['mifa:link_url']} })
+    links: Optional[list[Link]] = Field(default=None, description="""Web pages about the set or its data, e.g. a repository or a project page.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet']} })
     study: Optional[Study] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet']} })
     source_dataset: Optional[SourceDataset] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet']} })
     methodology: Methodology = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet']} })
@@ -269,16 +288,23 @@ class AnnotationSet(ConfiguredBaseModel):
 
 class Person(ConfiguredBaseModel):
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'schema:Person',
-         'close_mappings': ['mifa:Author'],
+         'exact_mappings': ['mifa:Author'],
          'from_schema': 'https://w3id.org/bioimage-annotation-schema'})
 
-    name: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet', 'Person', 'Tool', 'Model', 'AnnotationClass'],
-         'slot_uri': 'schema:name'} })
-    affiliation: Optional[str] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['Person'], 'slot_uri': 'schema:affiliation'} })
+    first_name: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['Person'],
+         'exact_mappings': ['mifa:author_first_name'],
+         'slot_uri': 'schema:givenName'} })
+    last_name: str = Field(default=..., description="""Family name, with particles such as \"van der\".""", json_schema_extra = { "linkml_meta": {'domain_of': ['Person'],
+         'exact_mappings': ['mifa:author_last_name'],
+         'slot_uri': 'schema:familyName'} })
     orcid: Optional[str] = Field(default=None, description="""ORCID iD as URL.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Person'], 'exact_mappings': ['mifa:orcid_id']} })
     email: Optional[str] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['Person'],
          'exact_mappings': ['mifa:email'],
          'slot_uri': 'schema:email'} })
+    affiliations: Optional[list[Organisation]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['Person'],
+         'exact_mappings': ['mifa:organisation'],
+         'slot_uri': 'schema:affiliation'} })
+    roles: Optional[list[str]] = Field(default=None, description="""Roles in the work, e.g. annotator, data curator.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Person'], 'exact_mappings': ['mifa:role']} })
 
     @field_validator('orcid')
     def pattern_orcid(cls, v):
@@ -294,6 +320,72 @@ class Person(ConfiguredBaseModel):
         return v
 
 
+class Organisation(ConfiguredBaseModel):
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'schema:Organization',
+         'exact_mappings': ['mifa:OrganisationInfo'],
+         'from_schema': 'https://w3id.org/bioimage-annotation-schema'})
+
+    name: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet',
+                       'Organisation',
+                       'Tool',
+                       'Model',
+                       'AnnotationClass'],
+         'exact_mappings': ['mifa:organisation_name'],
+         'slot_uri': 'schema:name'} })
+    ror: Optional[str] = Field(default=None, description="""ROR identifier as URL, e.g. https://ror.org/027bh9e22.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Organisation'], 'exact_mappings': ['mifa:ror_id']} })
+    address: Optional[str] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['Organisation'], 'exact_mappings': ['mifa:address']} })
+
+    @field_validator('ror')
+    def pattern_ror(cls, v):
+        pattern=re.compile(r"^https://ror\.org/[0-9a-z]{9}$")
+        if isinstance(v, list):
+            for element in v:
+                if isinstance(element, str) and not pattern.search(element):
+                    err_msg = f"Invalid ror format: {element}"
+                    raise ValueError(err_msg)
+        elif isinstance(v, str) and not pattern.search(v):
+            err_msg = f"Invalid ror format: {v}"
+            raise ValueError(err_msg)
+        return v
+
+
+class Link(ConfiguredBaseModel):
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://w3id.org/bioimage-annotation-schema'})
+
+    url: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['Link', 'SourceDataset', 'Model'],
+         'exact_mappings': ['mifa:link_url'],
+         'slot_uri': 'schema:url'} })
+    description: Optional[str] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet',
+                       'Link',
+                       'Study',
+                       'SourceDataset',
+                       'AnnotationClass'],
+         'exact_mappings': ['mifa:link_description']} })
+
+
+class Publication(ConfiguredBaseModel):
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'schema:ScholarlyArticle',
+         'exact_mappings': ['mifa:Publications'],
+         'from_schema': 'https://w3id.org/bioimage-annotation-schema'})
+
+    title: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['Publication', 'Study'],
+         'exact_mappings': ['mifa:publication_title']} })
+    authors: str = Field(default=..., description="""Author list as written in the reference.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet', 'Publication'],
+         'exact_mappings': ['mifa:publication_authors']} })
+    doi: Optional[str] = Field(default=None, description="""DOI as URL, e.g. https://doi.org/10.1038/s41592-019-0612-7.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Publication', 'Model'],
+         'exact_mappings': ['mifa:publication_doi']} })
+    year: Optional[int] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['Publication'], 'exact_mappings': ['mifa:publication_year']} })
+    pubmed_id: Optional[str] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['Publication'], 'exact_mappings': ['mifa:pubmed_id']} })
+
+
+class Grant(ConfiguredBaseModel):
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'exact_mappings': ['mifa:GrantReference'],
+         'from_schema': 'https://w3id.org/bioimage-annotation-schema'})
+
+    id: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['Grant', 'Session'], 'exact_mappings': ['mifa:grant_id']} })
+    funder: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['Grant'], 'exact_mappings': ['mifa:funder']} })
+
+
 class Study(ConfiguredBaseModel):
     """
     Biological and experimental context of the images.
@@ -301,12 +393,19 @@ class Study(ConfiguredBaseModel):
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'close_mappings': ['mifa:Study'],
          'from_schema': 'https://w3id.org/bioimage-annotation-schema'})
 
-    title: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['Study'], 'exact_mappings': ['mifa:title']} })
-    description: Optional[str] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet', 'Study', 'SourceDataset', 'AnnotationClass'],
+    title: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['Publication', 'Study'], 'exact_mappings': ['mifa:title']} })
+    description: Optional[str] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet',
+                       'Link',
+                       'Study',
+                       'SourceDataset',
+                       'AnnotationClass'],
          'exact_mappings': ['mifa:description']} })
     organism: Optional[str] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['Study']} })
     imaging_method: Optional[str] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['Study']} })
     funding_statement: Optional[str] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['Study'], 'exact_mappings': ['mifa:funding_statement']} })
+    publications: Optional[list[Publication]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['Study'], 'exact_mappings': ['mifa:publications']} })
+    grants: Optional[list[Grant]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['Study'], 'exact_mappings': ['mifa:grants']} })
+    acknowledgements: Optional[str] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['Study'], 'exact_mappings': ['mifa:acknowledgements']} })
 
 
 class SourceDataset(ConfiguredBaseModel):
@@ -315,9 +414,13 @@ class SourceDataset(ConfiguredBaseModel):
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://w3id.org/bioimage-annotation-schema'})
 
-    description: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet', 'Study', 'SourceDataset', 'AnnotationClass']} })
+    description: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet',
+                       'Link',
+                       'Study',
+                       'SourceDataset',
+                       'AnnotationClass']} })
     identifier: Optional[str] = Field(default=None, description="""Accession or DOI, e.g. S-BIAD123 or idr0001.""", json_schema_extra = { "linkml_meta": {'domain_of': ['SourceDataset'], 'slot_uri': 'schema:identifier'} })
-    url: Optional[str] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['SourceDataset', 'Model'], 'slot_uri': 'schema:url'} })
+    url: Optional[str] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['Link', 'SourceDataset', 'Model'], 'slot_uri': 'schema:url'} })
     license: Optional[str] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet', 'SourceDataset'], 'slot_uri': 'schema:license'} })
 
 
@@ -335,6 +438,7 @@ class Methodology(ConfiguredBaseModel):
     criteria: str = Field(default=..., description="""What counts as an object and where its boundary is, in words.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Methodology'], 'exact_mappings': ['mifa:annotation_criteria']} })
     coverage: Optional[Coverage] = Field(default=None, description="""Within an annotated region, whether all objects are annotated, a representative selection, or only some.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Methodology']} })
     coverage_description: Optional[str] = Field(default=None, description="""Which images were annotated and what share of the dataset, in words.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Methodology'], 'exact_mappings': ['mifa:annotation_coverage']} })
+    annotators: Optional[list[Person]] = Field(default=None, description="""People who made or reviewed the annotations, if different from the set's authors.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Methodology'], 'exact_mappings': ['mifa:authors']} })
     confidence_level: Optional[str] = Field(default=None, description="""Confidence in the annotations' accuracy, e.g. annotator experience or inter-annotator agreement.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Methodology'],
          'exact_mappings': ['mifa:annotation_confidence_level']} })
     tools: Optional[list[Tool]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['Methodology']} })
@@ -344,9 +448,14 @@ class Tool(ConfiguredBaseModel):
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'schema:SoftwareApplication',
          'from_schema': 'https://w3id.org/bioimage-annotation-schema'})
 
-    name: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet', 'Person', 'Tool', 'Model', 'AnnotationClass'],
+    name: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet',
+                       'Organisation',
+                       'Tool',
+                       'Model',
+                       'AnnotationClass'],
          'slot_uri': 'schema:name'} })
-    version: Optional[str] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['Tool', 'Model'], 'slot_uri': 'schema:softwareVersion'} })
+    version: Optional[str] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet', 'Tool', 'Model'],
+         'slot_uri': 'schema:softwareVersion'} })
     mode: Optional[ToolMode] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['Tool', 'PlaneSelection']} })
     model: Optional[Model] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['Tool', 'Session']} })
     parameters: Optional[Any] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['Tool']} })
@@ -358,10 +467,14 @@ class Model(ConfiguredBaseModel):
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://w3id.org/bioimage-annotation-schema'})
 
-    name: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet', 'Person', 'Tool', 'Model', 'AnnotationClass']} })
-    version: Optional[str] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['Tool', 'Model']} })
-    url: Optional[str] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['SourceDataset', 'Model']} })
-    doi: Optional[str] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['Model']} })
+    name: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet',
+                       'Organisation',
+                       'Tool',
+                       'Model',
+                       'AnnotationClass']} })
+    version: Optional[str] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet', 'Tool', 'Model']} })
+    url: Optional[str] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['Link', 'SourceDataset', 'Model']} })
+    doi: Optional[str] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['Publication', 'Model']} })
 
 
 class AnnotationClass(ConfiguredBaseModel):
@@ -370,8 +483,16 @@ class AnnotationClass(ConfiguredBaseModel):
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://w3id.org/bioimage-annotation-schema'})
 
-    name: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet', 'Person', 'Tool', 'Model', 'AnnotationClass']} })
-    description: Optional[str] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet', 'Study', 'SourceDataset', 'AnnotationClass']} })
+    name: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet',
+                       'Organisation',
+                       'Tool',
+                       'Model',
+                       'AnnotationClass']} })
+    description: Optional[str] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet',
+                       'Link',
+                       'Study',
+                       'SourceDataset',
+                       'AnnotationClass']} })
     label_value: Optional[int] = Field(default=None, description="""Pixel value of the class in semantic masks. Not used for instance masks, where each object has its own value.""", ge=0, json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationClass']} })
     ontology_term: Optional[str] = Field(default=None, description="""IRI of an ontology term for the class, e.g. a CL or GO term.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationClass']} })
     color: Optional[str] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationClass']} })
@@ -459,7 +580,7 @@ class Session(ConfiguredBaseModel):
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'class_uri': 'prov:Activity',
          'from_schema': 'https://w3id.org/bioimage-annotation-schema'})
 
-    id: int = Field(default=..., ge=0, json_schema_extra = { "linkml_meta": {'domain_of': ['Session']} })
+    id: int = Field(default=..., ge=0, json_schema_extra = { "linkml_meta": {'domain_of': ['Grant', 'Session']} })
     kind: SessionKind = Field(default=..., description="""'annotate' creates annotations, 'review' checks or corrects them.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Session']} })
     started: datetime  = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['Session'], 'slot_uri': 'prov:startedAtTime'} })
     ended: Optional[datetime ] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['Session'], 'slot_uri': 'prov:endedAtTime'} })
@@ -529,6 +650,7 @@ class AnnotationRecord(ConfiguredBaseModel):
     mask_digest: Optional[str] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationRecord']} })
     input_iscc: Optional[str] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationRecord']} })
     mask_iscc: Optional[str] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationRecord']} })
+    transformations: Optional[str] = Field(default=None, description="""Transformations needed to align the annotation with the source image, e.g. a rotation or crop.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationRecord'], 'exact_mappings': ['mifa:transformations']} })
     external_ids: Optional[str] = Field(default=None, description="""Identifiers of copies in other systems as a JSON object, e.g. {\"omero_roi\":\"123\",\"omero_label_image\":\"456\"}.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationRecord']} })
 
 
@@ -536,6 +658,10 @@ class AnnotationRecord(ConfiguredBaseModel):
 # see https://pydantic-docs.helpmanual.io/usage/models/#rebuilding-a-model
 AnnotationSet.model_rebuild()
 Person.model_rebuild()
+Organisation.model_rebuild()
+Link.model_rebuild()
+Publication.model_rebuild()
+Grant.model_rebuild()
 Study.model_rebuild()
 SourceDataset.model_rebuild()
 Methodology.model_rebuild()
