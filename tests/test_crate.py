@@ -73,6 +73,27 @@ class TestRoCrate:
         _, by_id = _crate(set_folder)
         assert not any("secret" in i for i in by_id)
 
+    def test_organism_and_imaging_method_are_terms_of_the_dataset(self, set_folder):
+        _, by_id = _crate(set_folder)
+        organism = by_id[by_id["./"]["about"]["@id"]]
+        assert organism == {
+            "@id": "http://purl.obolibrary.org/obo/NCBITaxon_9606",
+            "@type": "DefinedTerm",
+            "name": "Homo sapiens",
+        }
+        method = by_id[by_id["./"]["measurementTechnique"]["@id"]]
+        assert method["@id"] == "http://purl.obolibrary.org/obo/FBbi_00100013"
+        assert method["name"] == "widefield fluorescence microscopy"
+
+    def test_free_text_organism_gets_a_local_id(self, set_folder):
+        annotation_set, records = read_set(set_folder), read_records(set_folder)
+        annotation_set.study.organism_term = None
+        annotation_set.study.imaging_method = annotation_set.study.imaging_method_term = None
+        by_id = {e["@id"]: e for e in build_ro_crate(annotation_set, records, set_folder)["@graph"]}
+        organism = by_id[by_id["./"]["about"]["@id"]]
+        assert organism["@id"].startswith("#organism-") and organism["name"] == "Homo sapiens"
+        assert "measurementTechnique" not in by_id["./"]
+
     def test_local_source_paths_are_replaced_by_an_id(self, set_folder):
         path = set_folder / "annotation-records.csv"
         path.write_text(path.read_text().replace("omero:image:101", "/home/jane/plate.zarr/B/2/0"))

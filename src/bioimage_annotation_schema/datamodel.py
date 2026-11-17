@@ -587,7 +587,9 @@ class Study(ConfiguredBaseModel):
                        'AnnotationClass'],
          'exact_mappings': ['mifa:description']} })
     organism: Optional[str] = Field(default=None, description="""Organism the samples come from, e.g. Homo sapiens.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Study']} })
+    organism_term: Optional[str] = Field(default=None, description="""IRI of an NCBI Taxonomy term for the organism, e.g. http://purl.obolibrary.org/obo/NCBITaxon_9606.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Study']} })
     imaging_method: Optional[str] = Field(default=None, description="""Imaging method, e.g. confocal fluorescence microscopy.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Study']} })
+    imaging_method_term: Optional[str] = Field(default=None, description="""IRI of an FBbi term for the imaging method, e.g. http://purl.obolibrary.org/obo/FBbi_00100013.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Study']} })
     funding_statement: Optional[str] = Field(default=None, description="""How the study was funded, in words.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Study'], 'exact_mappings': ['mifa:funding_statement']} })
     publications: Optional[list[Publication]] = Field(default=None, description="""Publications associated with the study.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Study'], 'exact_mappings': ['mifa:publications']} })
     grants: Optional[list[Grant]] = Field(default=None, description="""Grants that funded the study.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Study'], 'exact_mappings': ['mifa:grants']} })

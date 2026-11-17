@@ -26,3 +26,7 @@ fixes descriptions or loosens constraints.
 - Documentation site (Zensical): overview tree and class diagram, interactive model
   browser, MIFA crosswalk and LinkML reference pages, all generated from the schema.
   Every class, field and allowed value has a description.
+- Ontology terms next to the free text of a study: optional `organism_term` (NCBI
+  Taxonomy IRI) and `imaging_method_term` (FBbi IRI). The MIFA export adds the IRI
+  in parentheses to the annotation overview; the RO-Crate lists organism and
+  imaging method as `about` and `measurementTechnique` of the dataset.

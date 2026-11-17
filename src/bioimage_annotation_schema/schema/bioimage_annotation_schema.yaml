@@ -297,8 +297,18 @@ classes:
           - mifa:description
       organism:
         description: Organism the samples come from, e.g. Homo sapiens.
+      organism_term:
+        description: >-
+          IRI of an NCBI Taxonomy term for the organism, e.g.
+          http://purl.obolibrary.org/obo/NCBITaxon_9606.
+        range: uri
       imaging_method:
         description: Imaging method, e.g. confocal fluorescence microscopy.
+      imaging_method_term:
+        description: >-
+          IRI of an FBbi term for the imaging method, e.g.
+          http://purl.obolibrary.org/obo/FBbi_00100013.
+        range: uri
       funding_statement:
         description: How the study was funded, in words.
         exact_mappings:

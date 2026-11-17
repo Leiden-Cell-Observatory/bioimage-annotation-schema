@@ -12,6 +12,7 @@ from bioimage_annotation_schema.mifa import (
     MifaNotReady,
     check_mifa,
     compose_method,
+    compose_overview,
     save_bia_package,
     save_mifa,
 )
@@ -81,6 +82,19 @@ class TestMifaDocuments:
         with pytest.raises(MifaNotReady):
             save_bia_package(annotation_set, read_records(set_folder), set_folder, tmp_path / "bia")
         assert not (tmp_path / "mifa").exists() and not (tmp_path / "bia").exists()
+
+    def test_composed_overview_names_ontology_terms_when_given(self, set_folder):
+        annotation_set = read_set(set_folder)
+        annotation_set.methodology.overview = None
+        overview = compose_overview(annotation_set)
+        assert "Organism: Homo sapiens (http://purl.obolibrary.org/obo/NCBITaxon_9606)." in overview
+        assert (
+            "Imaging method: widefield fluorescence microscopy"
+            " (http://purl.obolibrary.org/obo/FBbi_00100013)." in overview
+        )
+        annotation_set.study.organism_term = annotation_set.study.imaging_method_term = None
+        overview = compose_overview(annotation_set)
+        assert "Organism: Homo sapiens. Imaging method: widefield fluorescence microscopy." in overview
 
 
 class TestBiaBundle:
