@@ -31,7 +31,9 @@ study:
       doi: https://doi.org/10.1000/example
       year: 2026
   organism: Homo sapiens
+  organism_term: http://purl.obolibrary.org/obo/NCBITaxon_9606
   imaging_method: widefield fluorescence microscopy
+  imaging_method_term: http://purl.obolibrary.org/obo/FBbi_00100013
 source_dataset:
   description: 384-well plate, Hoechst and brightfield
   identifier: idr0000

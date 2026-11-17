@@ -4,7 +4,9 @@ An `RO-Crate <https://w3id.org/ro/crate/1.1>`_ is a JSON-LD file next to the dat
 that says what the folder holds and how it came about, in a form repositories and
 workflow tools read. For an annotation set it lists:
 
-- the set (name, description, licence, authors) as the root dataset,
+- the set (name, description, licence, authors) as the root dataset, with the
+  study's organism (``about``) and imaging method (``measurementTechnique``) as
+  terms, identified by their ontology IRI when recorded,
 - the files: the set document, the records table, each annotated image region and
   each mask, with the pixel SHA-256 digest and ISCC code when recorded,
 - the source images by URI, with their ISCC code when recorded; a URI that is not
@@ -218,6 +220,16 @@ def _authors(graph: _Graph, annotation_set: AnnotationSet) -> list[dict[str, str
     return authors
 
 
+def _term(graph: _Graph, kind: str, name: str | None, iri: str | None) -> dict[str, str] | None:
+    """A ``DefinedTerm`` for a free-text name and/or its ontology term IRI."""
+    if not (name or iri):
+        return None
+    term: Entity = {"@id": iri or _local_id(kind, name or ""), "@type": "DefinedTerm"}
+    if name:
+        term["name"] = name
+    return graph.add(term)
+
+
 def build_ro_crate(
     annotation_set: AnnotationSet,
     records: Sequence[AnnotationRecord],
@@ -299,6 +311,12 @@ def build_ro_crate(
         root["author"] = authors
     if annotation_set.keywords:
         root["keywords"] = annotation_set.keywords
+    if study and (organism := _term(graph, "organism", study.organism, study.organism_term)):
+        root["about"] = organism
+    if study and (
+        method := _term(graph, "method", study.imaging_method, study.imaging_method_term)
+    ):
+        root["measurementTechnique"] = method
     descriptor: Entity = {
         "@id": METADATA_FILE,
         "@type": "CreativeWork",

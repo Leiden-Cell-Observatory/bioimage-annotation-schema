@@ -95,6 +95,11 @@ def annotated(records: Sequence[AnnotationRecord]) -> list[AnnotationRecord]:
     return [r for r in records if r.status == "annotated"]
 
 
+def _with_term(text: str, term: str | None) -> str:
+    """``text``, followed by its ontology term IRI in parentheses when given."""
+    return f"{text} ({term})" if term else text
+
+
 def compose_overview(annotation_set: AnnotationSet) -> str:
     """MIFA ``annotation_overview``: the set's own, or one written from its fields."""
     meth = annotation_set.methodology
@@ -111,9 +116,9 @@ def compose_overview(annotation_set: AnnotationSet) -> str:
         + ".",
     ]
     if study and study.organism:
-        parts.append(f"Organism: {study.organism}.")
+        parts.append(f"Organism: {_with_term(study.organism, study.organism_term)}.")
     if study and study.imaging_method:
-        parts.append(f"Imaging method: {study.imaging_method}.")
+        parts.append(f"Imaging method: {_with_term(study.imaging_method, study.imaging_method_term)}.")
     if annotation_set.source_dataset:
         src = annotation_set.source_dataset
         parts.append(f"Source dataset: {src.identifier or src.description}.")

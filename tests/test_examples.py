@@ -50,6 +50,20 @@ class TestAnnotationSet:
         del data["methodology"]
         assert not _validator("annotation-set.schema.json").is_valid(data)
 
+    def test_study_ontology_terms_are_optional(self):
+        data = _set()
+        assert data["study"]["organism_term"].endswith("NCBITaxon_9606")
+        assert data["study"]["imaging_method_term"].endswith("FBbi_00100013")
+        del data["study"]["organism_term"], data["study"]["imaging_method_term"]
+        _validator("annotation-set.schema.json").validate(data)
+        assert AnnotationSet(**data).study.organism_term is None
+
+    @pytest.mark.parametrize("slot", ["organism_term", "imaging_method_term"])
+    def test_study_term_that_is_no_iri_is_rejected(self, slot):
+        data = _set()
+        data["study"][slot] = "not an iri"
+        assert not _validator("annotation-set.schema.json").is_valid(data)
+
     def test_example_passes_linkml_validate(self):
         result = subprocess.run(
             ["linkml-validate", "-s", str(LINKML), "-C", "AnnotationSet",

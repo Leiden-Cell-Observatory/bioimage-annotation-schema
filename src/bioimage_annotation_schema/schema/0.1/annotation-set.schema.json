@@ -1480,8 +1480,24 @@
             "null"
           ]
         },
+        "imaging_method_term": {
+          "description": "IRI of an FBbi term for the imaging method, e.g. http://purl.obolibrary.org/obo/FBbi_00100013.",
+          "format": "uri",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "organism": {
           "description": "Organism the samples come from, e.g. Homo sapiens.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "organism_term": {
+          "description": "IRI of an NCBI Taxonomy term for the organism, e.g. http://purl.obolibrary.org/obo/NCBITaxon_9606.",
+          "format": "uri",
           "type": [
             "string",
             "null"
