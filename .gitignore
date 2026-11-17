@@ -2,3 +2,8 @@
 __pycache__/
 *.egg-info/
 .pytest_cache/
+docs/data/
+docs/overview.md
+docs/mifa.md
+docs/reference/
+site/

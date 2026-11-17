@@ -46,6 +46,7 @@ classes:
         required: true
         slot_uri: schema:name
       description:
+        description: What the set contains and what it is for, in a few sentences.
         slot_uri: schema:description
       created:
         description: When the set was created.
@@ -81,6 +82,7 @@ classes:
         exact_mappings:
           - mifa:ai_models_trained
       authors:
+        description: Authors of the set, in citation order.
         range: Person
         multivalued: true
         inlined_as_list: true
@@ -88,6 +90,7 @@ classes:
         exact_mappings:
           - mifa:author
       keywords:
+        description: Keywords or tags that describe the set.
         multivalued: true
         slot_uri: schema:keywords
         exact_mappings:
@@ -98,12 +101,15 @@ classes:
         multivalued: true
         inlined_as_list: true
       study:
+        description: The biological and experimental context of the images.
         range: Study
         inlined: true
       source_dataset:
+        description: The image dataset the annotated images come from.
         range: SourceDataset
         inlined: true
       methodology:
+        description: How the annotations were made.
         range: Methodology
         required: true
         inlined: true
@@ -113,13 +119,23 @@ classes:
         multivalued: true
         inlined_as_list: true
       sampling:
+        description: Which channels, planes and regions of the images were annotated.
         range: Sampling
         inlined: true
       split:
+        description: How the annotations were divided over training, validation and test.
         range: Split
         inlined: true
       normalization:
+        description: Intensity normalisation intended for model input.
         range: Normalization
+        inlined: true
+      content_codes:
+        description: >-
+          How the ISCC codes in the records were made. Required when any record has
+          input_iscc, mask_iscc or image_iscc: codes are only comparable when they
+          were made the same way.
+        range: ContentCodes
         inlined: true
       sessions:
         description: Annotation sessions, oldest first. Records refer to them by id.
@@ -139,11 +155,13 @@ classes:
     description: Any value.
 
   Person:
+    description: "A person: an author of the set or an annotator."
     class_uri: schema:Person
     exact_mappings:
       - mifa:Author
     attributes:
       first_name:
+        description: Given name.
         required: true
         slot_uri: schema:givenName
         exact_mappings:
@@ -160,10 +178,12 @@ classes:
         exact_mappings:
           - mifa:orcid_id
       email:
+        description: Email address.
         slot_uri: schema:email
         exact_mappings:
           - mifa:email
       affiliations:
+        description: Organisations the person is affiliated with.
         range: Organisation
         multivalued: true
         inlined_as_list: true
@@ -177,11 +197,13 @@ classes:
           - mifa:role
 
   Organisation:
+    description: An organisation a person is affiliated with.
     class_uri: schema:Organization
     exact_mappings:
       - mifa:OrganisationInfo
     attributes:
       name:
+        description: Name of the organisation.
         required: true
         slot_uri: schema:name
         exact_mappings:
@@ -192,27 +214,33 @@ classes:
         exact_mappings:
           - mifa:ror_id
       address:
+        description: Postal address of the organisation.
         exact_mappings:
           - mifa:address
 
   Link:
+    description: A web page about the set or its data.
     attributes:
       url:
+        description: URL of the page.
         range: uri
         required: true
         slot_uri: schema:url
         exact_mappings:
           - mifa:link_url
       description:
+        description: What the linked page contains.
         exact_mappings:
           - mifa:link_description
 
   Publication:
+    description: A publication associated with the study.
     class_uri: schema:ScholarlyArticle
     exact_mappings:
       - mifa:Publications
     attributes:
       title:
+        description: Title of the publication.
         required: true
         exact_mappings:
           - mifa:publication_title
@@ -227,23 +255,28 @@ classes:
         exact_mappings:
           - mifa:publication_doi
       year:
+        description: Year of publication.
         range: integer
         exact_mappings:
           - mifa:publication_year
       pubmed_id:
+        description: PubMed identifier.
         range: uriorcurie
         exact_mappings:
           - mifa:pubmed_id
 
   Grant:
+    description: A grant that funded the study.
     exact_mappings:
       - mifa:GrantReference
     attributes:
       id:
+        description: Identifier of the grant.
         required: true
         exact_mappings:
           - mifa:grant_id
       funder:
+        description: Name of the funding body.
         required: true
         exact_mappings:
           - mifa:funder
@@ -254,30 +287,38 @@ classes:
       - mifa:Study
     attributes:
       title:
+        description: Title of the study; often the title of the associated publication.
         required: true
         exact_mappings:
           - mifa:title
       description:
+        description: Brief description of the study, including the biological application of the images.
         exact_mappings:
           - mifa:description
       organism:
+        description: Organism the samples come from, e.g. Homo sapiens.
       imaging_method:
+        description: Imaging method, e.g. confocal fluorescence microscopy.
       funding_statement:
+        description: How the study was funded, in words.
         exact_mappings:
           - mifa:funding_statement
       publications:
+        description: Publications associated with the study.
         range: Publication
         multivalued: true
         inlined_as_list: true
         exact_mappings:
           - mifa:publications
       grants:
+        description: Grants that funded the study.
         range: Grant
         multivalued: true
         inlined_as_list: true
         exact_mappings:
           - mifa:grants
       acknowledgements:
+        description: People or groups to acknowledge.
         exact_mappings:
           - mifa:acknowledgements
 
@@ -285,14 +326,17 @@ classes:
     description: The image dataset the annotated images come from.
     attributes:
       description:
+        description: What the source images are, in words.
         required: true
       identifier:
         description: Accession or DOI, e.g. S-BIAD123 or idr0001.
         slot_uri: schema:identifier
       url:
+        description: Web page or download address of the dataset.
         range: uri
         slot_uri: schema:url
       license:
+        description: License of the source images, e.g. CC-BY-4.0.
         slot_uri: schema:license
 
   Methodology:
@@ -303,6 +347,7 @@ classes:
         exact_mappings:
           - mifa:annotation_overview
       annotation_types:
+        description: "Kinds of annotation in the set, using MIFA's values."
         range: AnnotationType
         required: true
         multivalued: true
@@ -312,6 +357,7 @@ classes:
         description: For segmentation masks - one value per object (instance) or per class (semantic).
         range: MaskKind
       method:
+        description: Whether annotations were drawn by hand, proposed by software and corrected, or made by software alone.
         range: AnnotationMethod
       method_description:
         description: >-
@@ -345,42 +391,55 @@ classes:
         exact_mappings:
           - mifa:annotation_confidence_level
       tools:
+        description: Software used to make the annotations.
         range: Tool
         multivalued: true
         inlined_as_list: true
 
   Tool:
+    description: Software used to make the annotations.
     class_uri: schema:SoftwareApplication
     attributes:
       name:
+        description: Name of the software, e.g. micro-sam or cellpose.
         required: true
         slot_uri: schema:name
       version:
+        description: Version of the software.
         slot_uri: schema:softwareVersion
       mode:
+        description: How the software was used.
         range: ToolMode
       model:
+        description: The AI model the software used, if any.
         range: Model
         inlined: true
       parameters:
+        description: Settings the software ran with, as the tool names them.
         range: Any
 
   Model:
     description: An AI model that proposed annotations.
     attributes:
       name:
+        description: Name of the model, e.g. vit_b_lm.
         required: true
       version:
+        description: Version of the model.
       url:
+        description: Where the model can be found, e.g. a BioImage Model Zoo page.
         range: uri
       doi:
+        description: DOI of the model.
 
   AnnotationClass:
     description: One annotation class.
     attributes:
       name:
+        description: Name of the class, e.g. nucleus.
         required: true
       description:
+        description: What belongs to the class, in words.
       label_value:
         description: >-
           Pixel value of the class in semantic masks. Not used for instance masks,
@@ -391,12 +450,14 @@ classes:
         description: IRI of an ontology term for the class, e.g. a CL or GO term.
         range: uri
       color:
+        description: "Display colour as hex, e.g. #E4685D."
         pattern: "^#[0-9A-Fa-f]{6}$"
 
   PlaneSelection:
     description: Which timepoints or z-slices were annotated.
     attributes:
       mode:
+        description: How the planes were chosen.
         range: SelectionMode
         required: true
       values:
@@ -422,15 +483,18 @@ classes:
         range: integer
         multivalued: true
       timepoints:
+        description: Which timepoints were annotated.
         range: PlaneSelection
         inlined: true
       z_slices:
+        description: Which z-slices were annotated.
         range: PlaneSelection
         inlined: true
       volumetric:
         description: True if annotations are 3D volumes rather than 2D planes.
         range: boolean
       patches:
+        description: Patch size and number, if annotations cover patches.
         range: Patches
         inlined: true
 
@@ -438,23 +502,28 @@ classes:
     description: Present if annotations cover patches rather than whole planes.
     attributes:
       width:
+        description: Patch width in pixels.
         range: integer
         required: true
         minimum_value: 1
       height:
+        description: Patch height in pixels.
         range: integer
         required: true
         minimum_value: 1
       per_image:
+        description: Number of patches per image plane.
         range: integer
         minimum_value: 1
       random:
+        description: True if patch positions were drawn at random, false if they tile the plane.
         range: boolean
 
   Split:
     description: How annotations were divided over training, validation and test.
     attributes:
       strategy:
+        description: How the split was decided.
         range: SplitStrategy
       unit:
         description: >-
@@ -474,17 +543,21 @@ classes:
     description: Intensity normalisation intended for model input.
     attributes:
       method:
+        description: Normalisation method.
         range: NormalizationMethod
         required: true
       percentile_low:
+        description: Lower percentile, mapped to 0.
         range: float
         minimum_value: 0
         maximum_value: 100
       percentile_high:
+        description: Upper percentile, mapped to 1.
         range: float
         minimum_value: 0
         maximum_value: 100
       clip:
+        description: "True if values outside [0, 1] are clipped."
         range: boolean
 
   Session:
@@ -492,6 +565,7 @@ classes:
     class_uri: prov:Activity
     attributes:
       id:
+        description: Number of the session within the set, from 0.
         range: integer
         required: true
         minimum_value: 0
@@ -500,13 +574,16 @@ classes:
         range: SessionKind
         required: true
       started:
+        description: When the session started.
         range: datetime
         required: true
         slot_uri: prov:startedAtTime
       ended:
+        description: When the session ended; absent while it is open.
         range: datetime
         slot_uri: prov:endedAtTime
       status:
+        description: State of the session.
         range: SessionStatus
       annotator:
         description: Who annotated - a name, ORCID or pseudonym.
@@ -515,9 +592,59 @@ classes:
       model:
         description: Name of the AI model used in the session, if any.
       n_annotated:
+        description: Number of annotations saved in the session.
         range: integer
         minimum_value: 0
       note:
+        description: Free-text note by the annotator.
+
+  ContentCodes:
+    description: >-
+      How the ISCC codes (ISO 24138) in the records were made. ISCC is a family of
+      codes: the same image gives different codes depending on the code type, which
+      pixels are coded and how they are prepared, so each kind is declared here.
+    attributes:
+      region:
+        description: How input_iscc and mask_iscc were made.
+        range: CodeMethod
+        inlined: true
+      image:
+        description: How image_iscc (the code of the whole source image) was made.
+        range: CodeMethod
+        inlined: true
+
+  CodeMethod:
+    description: How one kind of ISCC code was computed.
+    attributes:
+      code_type:
+        description: The ISCC code type.
+        range: IsccCodeType
+        required: true
+      bits:
+        description: >-
+          Length of the code's body in bits, e.g. 64 for an Image-Code unit, 128 or
+          256 (wide) for an ISCC-SUM.
+        range: integer
+        minimum_value: 1
+      pixels:
+        description: >-
+          Which pixels were coded, e.g. 'the annotated region as saved in
+          input_file' or 'all planes of the source image'.
+        required: true
+      preparation:
+        description: >-
+          What was done to the pixels before coding: plane order and byte encoding,
+          projection, resizing, intensity scaling, mask binarisation. 'none' if the
+          stored pixels were coded as they are.
+        required: true
+      specification:
+        description: >-
+          The specification the preparation follows, if any, e.g.
+          https://ieps.iscc.codes/iep-0018/ (IMAGEWALK) for bioimage ISCC-SUMs.
+        range: uri
+      implementation:
+        description: Software and version that computed the codes, e.g. 'omero-annotate-ai 0.6.0 (iscc-lib 0.7.1)'.
+        required: true
 
   AnnotationRecord:
     description: >-
@@ -542,6 +669,7 @@ classes:
         exact_mappings:
           - mifa:source_image_id
       image_name:
+        description: Name of the source image, for people.
       level:
         description: Multiscale level the coordinates refer to (0 = full resolution).
         range: integer
@@ -553,9 +681,11 @@ classes:
       well_metadata:
         description: Key-value metadata of the well as a JSON object, e.g. {"cell_line":"U2OS"}.
       channel:
+        description: Channel annotated, from 0.
         range: integer
         minimum_value: 0
       timepoint:
+        description: Timepoint annotated, from 0.
         range: integer
         minimum_value: 0
       z_slice:
@@ -571,33 +701,42 @@ classes:
         range: integer
         minimum_value: 0
       patch_x:
+        description: Left edge of the patch in pixels, at the given level.
         range: integer
         minimum_value: 0
       patch_y:
+        description: Top edge of the patch in pixels, at the given level.
         range: integer
         minimum_value: 0
       patch_width:
+        description: Width of the patch in pixels.
         range: integer
         minimum_value: 1
       patch_height:
+        description: Height of the patch in pixels.
         range: integer
         minimum_value: 1
       split:
+        description: Split the annotation belongs to.
         range: SplitName
         required: true
       status:
+        description: State of the annotation.
         range: RecordStatus
         required: true
       annotation_type:
+        description: "Kind of annotation, using MIFA's values."
         range: AnnotationType
         exact_mappings:
           - mifa:annotation_type
       created_at:
+        description: When the annotation was created.
         range: datetime
         slot_uri: pav:authoredOn
         exact_mappings:
           - mifa:annotation_creation_time
       updated_at:
+        description: When the annotation was last changed.
         range: datetime
         slot_uri: pav:lastUpdateOn
       session:
@@ -609,12 +748,25 @@ classes:
       mask_file:
         description: Path of the mask, relative to the set's folder.
       input_digest:
+        description: Pixel SHA-256 of the annotated image region.
         range: PixelDigest
       mask_digest:
+        description: Pixel SHA-256 of the mask.
         range: PixelDigest
       input_iscc:
+        description: >-
+          ISCC code of the annotated image region, made as declared in the set's
+          content_codes.region.
         range: IsccCode
       mask_iscc:
+        description: ISCC code of the mask, made as declared in the set's content_codes.region.
+        range: IsccCode
+      image_iscc:
+        description: >-
+          ISCC code of the whole source image, made as declared in the set's
+          content_codes.image - for example the ISCC-SUM (IMAGEWALK) that
+          omero-iscc stores on OMERO images. Identifies the source by content,
+          whatever its URI.
         range: IsccCode
       transformations:
         description: Transformations needed to align the annotation with the source image, e.g. a rotation or crop.
@@ -665,21 +817,29 @@ types:
       Pixel SHA-256 - lowercase hex SHA-256 of the UTF-8 text '<dtype>|<shape>|'
       followed by the pixel values in C order, little-endian. <dtype> is the NumPy
       dtype string with '<' byte order (e.g. '<u2', '|u1'), <shape> the Python tuple
-      text (e.g. '(512, 512)'). Independent of file format and compression.
+      text (e.g. '(512, 512)'). Independent of file format and compression. An
+      exact-match check of the saved files; not the IMAGEWALK canonical bytes
+      (IEP-0018: big-endian, no dtype and shape prefix), so it does not equal a
+      SHA-256 another bioimage tool computes over IMAGEWALK.
     pattern: "^[0-9a-f]{64}$"
 
   IsccCode:
     typeof: string
-    description: ISCC Image-Code (ISO 24138), for finding near-duplicate images.
+    description: >-
+      An ISCC code (ISO 24138) in its canonical text form. Which code type and how
+      it was made is declared in the set's content_codes.
     pattern: "^ISCC:[A-Z2-7]+$"
 
 enums:
 
   License:
+    description: Licenses the BioImage Archive accepts for annotations.
     permissible_values:
       CC-BY-4.0:
+        description: "Creative Commons Attribution 4.0: reuse with credit."
         meaning: mifa:CC_BY
       CC0-1.0:
+        description: "Creative Commons Zero: no rights reserved."
         meaning: mifa:CC0
 
   AnnotationType:
@@ -687,29 +847,56 @@ enums:
     enum_uri: mifa:AnnotationType
     permissible_values:
       class_labels:
+        description: Tags that identify features, patterns or classes in images.
         meaning: mifa:class_labels
       bounding_boxes:
+        description: Rectangles completely enclosing a structure of interest.
         meaning: mifa:bounding_boxes
       counts:
+        description: Number of objects, such as cells, in an image.
         meaning: mifa:counts
       derived_annotations:
+        description: Values derived from the images, e.g. point spread function, signal-to-noise ratio or focus.
         meaning: mifa:derived_annotations
       geometrical_annotations:
+        description: "Polygons and shapes outlining a region of interest: primitives, 2D polygons, 3D meshes."
         meaning: mifa:geometrical_annotations
       graphs:
+        description: Graphs of the morphology, connectivity or spatial arrangement of structures, e.g. skeletons.
         meaning: mifa:graphs
       point_annotations:
+        description: Coordinates of points of interest, e.g. object centroids or landmarks.
         meaning: mifa:point_annotations
       segmentation_mask:
+        description: An image of the same size as the source, each pixel value marking an object, class or background.
         meaning: mifa:segmentation_mask
       tracks:
+        description: Movement or trajectories of objects through a sequence of images.
         meaning: mifa:tracks
       weak_annotations:
+        description: Rough, imprecise annotations that are fast to make, e.g. a scribble per object.
         meaning: mifa:weak_annotations
       other:
+        description: Another kind; describe it in the methodology overview.
         meaning: mifa:other
 
+  IsccCodeType:
+    description: ISCC code types used for images.
+    permissible_values:
+      image_code:
+        description: >-
+          ISCC-UNIT Image-Code - a perceptual code of a small grayscale image; codes
+          of similar images differ in few bits, so it finds near-duplicates.
+      iscc_sum:
+        description: >-
+          ISCC-SUM - Data-Code plus Instance-Code over a byte stream (for bioimages,
+          the IMAGEWALK canonical bytes); the Instance-Code part matches only
+          identical content.
+      iscc_code:
+        description: A composite ISCC-CODE of several units.
+
   MaskKind:
+    description: How pixel values in a segmentation mask are assigned.
     permissible_values:
       instance:
         description: Each object has its own pixel value.
@@ -717,36 +904,57 @@ enums:
         description: Each class has its own pixel value (see AnnotationClass.label_value).
 
   AnnotationMethod:
+    description: How much of the annotation was done by people and how much by software.
     permissible_values:
       manual:
+        description: Drawn by hand.
       semi_automatic:
+        description: Proposed by software and checked or corrected by a person.
       automatic:
+        description: Made by software without correction.
 
   Coverage:
+    description: How completely the objects in an annotated region are annotated.
     permissible_values:
       all:
+        description: Every object in the region is annotated.
       representative:
+        description: A representative selection of the objects is annotated.
       partial:
+        description: Only some objects are annotated, without claim of representativeness.
 
   ToolMode:
+    description: How a tool was used.
     permissible_values:
       automatic:
+        description: The tool annotated on its own.
       interactive:
+        description: "A person annotated with the tool's help, e.g. prompts to a segmentation model."
       human_in_the_loop:
+        description: "The tool's model was retrained on corrected annotations during the work."
 
   SelectionMode:
+    description: How timepoints or z-slices were chosen.
     permissible_values:
       all:
+        description: All of them.
       random:
+        description: A random draw of n.
       specific:
+        description: The indices listed in values.
 
   SplitStrategy:
+    description: How annotations were assigned to splits.
     permissible_values:
       random_split:
+        description: At random, by unit.
       expert_review:
+        description: Chosen by a person.
       cross_validation:
+        description: Rotating folds; the split recorded is one fold.
 
   NormalizationMethod:
+    description: Intensity normalisation methods.
     permissible_values:
       percentile:
         description: Per-image percentile bounds mapped to [0, 1].
@@ -754,23 +962,35 @@ enums:
         description: Raw intensities.
 
   SessionKind:
+    description: What a session did.
     permissible_values:
       annotate:
+        description: Created annotations.
       review:
+        description: Checked or corrected existing annotations.
 
   SessionStatus:
+    description: State of a session.
     permissible_values:
       open:
+        description: In progress.
       finished:
+        description: Ended normally.
       interrupted:
+        description: Ended without finishing, e.g. a crash or a closed window.
 
   SplitName:
+    description: The splits of a set.
     permissible_values:
       training:
+        description: Used to train models.
       validation:
+        description: Used to tune and select models during training.
       test:
+        description: Held out to evaluate the final model.
 
   RecordStatus:
+    description: State of an annotation record.
     permissible_values:
       pending:
         description: Not yet annotated.

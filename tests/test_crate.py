@@ -3,7 +3,8 @@
 import json
 
 from bioimage_annotation_schema import read_records, read_set
-from bioimage_annotation_schema.crate import METADATA_FILE, PROFILE, SPEC, write_ro_crate
+from bioimage_annotation_schema.crate import METADATA_FILE, PROFILE, SPEC, build_ro_crate, write_ro_crate
+from bioimage_annotation_schema.datamodel import CodeMethod, ContentCodes
 
 
 def _crate(folder):
@@ -77,3 +78,18 @@ class TestRoCrate:
         path.write_text(path.read_text().replace("omero:image:101", "/home/jane/plate.zarr/B/2/0"))
         _, by_id = _crate(set_folder)
         assert not any("/home/jane" in json.dumps(e) for e in by_id.values())
+
+    def test_iscc_codes_say_how_they_were_made(self, set_folder):
+        annotation_set, records = read_set(set_folder), read_records(set_folder)
+        annotation_set.content_codes = ContentCodes(
+            region=CodeMethod(
+                code_type="image_code", pixels="the region", preparation="none", implementation="tool 1"
+            )
+        )
+        records[0] = records[0].model_copy(
+            update={"input_iscc": "ISCC:EEA4GQZQTY6J5DTH", "image_iscc": "ISCC:KAA4GQZQTY6J5DTH"}
+        )
+        by_id = {e["@id"]: e for e in build_ro_crate(annotation_set, records, set_folder)["@graph"]}
+        code = by_id["#a1b2c3-input-iscc"]
+        assert code["name"] == "ISCC image_code of the region; none (tool 1)"
+        assert by_id["omero:image:101"]["identifier"] == "ISCC:KAA4GQZQTY6J5DTH"

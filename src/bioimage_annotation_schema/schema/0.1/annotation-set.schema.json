@@ -5,6 +5,7 @@
       "description": "One annotation class.",
       "properties": {
         "color": {
+          "description": "Display colour as hex, e.g. #E4685D.",
           "pattern": "^#[0-9A-Fa-f]{6}$",
           "type": [
             "string",
@@ -12,6 +13,7 @@
           ]
         },
         "description": {
+          "description": "What belongs to the class, in words.",
           "type": [
             "string",
             "null"
@@ -26,6 +28,7 @@
           ]
         },
         "name": {
+          "description": "Name of the class, e.g. nucleus.",
           "type": "string"
         },
         "ontology_term": {
@@ -44,7 +47,7 @@
       "type": "object"
     },
     "AnnotationMethod": {
-      "description": "",
+      "description": "How much of the annotation was done by people and how much by software.",
       "enum": [
         "manual",
         "semi_automatic",
@@ -133,9 +136,11 @@
             {
               "type": "null"
             }
-          ]
+          ],
+          "description": "Kind of annotation, using MIFA's values."
         },
         "channel": {
+          "description": "Channel annotated, from 0.",
           "minimum": 0,
           "type": [
             "integer",
@@ -143,6 +148,7 @@
           ]
         },
         "created_at": {
+          "description": "When the annotation was created.",
           "format": "date-time",
           "type": [
             "string",
@@ -163,7 +169,16 @@
             "null"
           ]
         },
+        "image_iscc": {
+          "description": "ISCC code of the whole source image, made as declared in the set's content_codes.image - for example the ISCC-SUM (IMAGEWALK) that omero-iscc stores on OMERO images. Identifies the source by content, whatever its URI.",
+          "pattern": "^ISCC:[A-Z2-7]+$",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "image_name": {
+          "description": "Name of the source image, for people.",
           "type": [
             "string",
             "null"
@@ -174,6 +189,7 @@
           "type": "string"
         },
         "input_digest": {
+          "description": "Pixel SHA-256 of the annotated image region.",
           "pattern": "^[0-9a-f]{64}$",
           "type": [
             "string",
@@ -188,6 +204,7 @@
           ]
         },
         "input_iscc": {
+          "description": "ISCC code of the annotated image region, made as declared in the set's content_codes.region.",
           "pattern": "^ISCC:[A-Z2-7]+$",
           "type": [
             "string",
@@ -203,6 +220,7 @@
           ]
         },
         "mask_digest": {
+          "description": "Pixel SHA-256 of the mask.",
           "pattern": "^[0-9a-f]{64}$",
           "type": [
             "string",
@@ -217,6 +235,7 @@
           ]
         },
         "mask_iscc": {
+          "description": "ISCC code of the mask, made as declared in the set's content_codes.region.",
           "pattern": "^ISCC:[A-Z2-7]+$",
           "type": [
             "string",
@@ -224,6 +243,7 @@
           ]
         },
         "patch_height": {
+          "description": "Height of the patch in pixels.",
           "minimum": 1,
           "type": [
             "integer",
@@ -231,6 +251,7 @@
           ]
         },
         "patch_width": {
+          "description": "Width of the patch in pixels.",
           "minimum": 1,
           "type": [
             "integer",
@@ -238,6 +259,7 @@
           ]
         },
         "patch_x": {
+          "description": "Left edge of the patch in pixels, at the given level.",
           "minimum": 0,
           "type": [
             "integer",
@@ -245,6 +267,7 @@
           ]
         },
         "patch_y": {
+          "description": "Top edge of the patch in pixels, at the given level.",
           "minimum": 0,
           "type": [
             "integer",
@@ -260,12 +283,15 @@
           ]
         },
         "split": {
-          "$ref": "#/$defs/SplitName"
+          "$ref": "#/$defs/SplitName",
+          "description": "Split the annotation belongs to."
         },
         "status": {
-          "$ref": "#/$defs/RecordStatus"
+          "$ref": "#/$defs/RecordStatus",
+          "description": "State of the annotation."
         },
         "timepoint": {
+          "description": "Timepoint annotated, from 0.",
           "minimum": 0,
           "type": [
             "integer",
@@ -280,6 +306,7 @@
           ]
         },
         "updated_at": {
+          "description": "When the annotation was last changed.",
           "format": "date-time",
           "type": [
             "string",
@@ -349,6 +376,7 @@
           ]
         },
         "authors": {
+          "description": "Authors of the set, in citation order.",
           "items": {
             "$ref": "#/$defs/Person"
           },
@@ -374,12 +402,24 @@
             "null"
           ]
         },
+        "content_codes": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ContentCodes"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "How the ISCC codes in the records were made. Required when any record has input_iscc, mask_iscc or image_iscc: codes are only comparable when they were made the same way."
+        },
         "created": {
           "description": "When the set was created.",
           "format": "date-time",
           "type": "string"
         },
         "description": {
+          "description": "What the set contains and what it is for, in a few sentences.",
           "type": [
             "string",
             "null"
@@ -397,6 +437,7 @@
           "description": "Tool- or project-specific metadata this schema does not cover, under a namespace key such as the tool name."
         },
         "keywords": {
+          "description": "Keywords or tags that describe the set.",
           "items": {
             "type": "string"
           },
@@ -420,7 +461,8 @@
           ]
         },
         "methodology": {
-          "$ref": "#/$defs/Methodology"
+          "$ref": "#/$defs/Methodology",
+          "description": "How the annotations were made."
         },
         "name": {
           "description": "Short name of the set.",
@@ -434,7 +476,8 @@
             {
               "type": "null"
             }
-          ]
+          ],
+          "description": "Intensity normalisation intended for model input."
         },
         "notes": {
           "description": "Free text - context, caveats, known issues.",
@@ -458,7 +501,8 @@
             {
               "type": "null"
             }
-          ]
+          ],
+          "description": "Which channels, planes and regions of the images were annotated."
         },
         "schema_version": {
           "description": "Version of this schema the document follows (semantic versioning).",
@@ -483,7 +527,8 @@
             {
               "type": "null"
             }
-          ]
+          ],
+          "description": "The image dataset the annotated images come from."
         },
         "split": {
           "anyOf": [
@@ -493,7 +538,8 @@
             {
               "type": "null"
             }
-          ]
+          ],
+          "description": "How the annotations were divided over training, validation and test."
         },
         "study": {
           "anyOf": [
@@ -503,7 +549,8 @@
             {
               "type": "null"
             }
-          ]
+          ],
+          "description": "The biological and experimental context of the images."
         },
         "version": {
           "description": "Version of this set, e.g. \"1\" or \"1.1\".",
@@ -553,8 +600,84 @@
         "string"
       ]
     },
+    "CodeMethod": {
+      "additionalProperties": false,
+      "description": "How one kind of ISCC code was computed.",
+      "properties": {
+        "bits": {
+          "description": "Length of the code's body in bits, e.g. 64 for an Image-Code unit, 128 or 256 (wide) for an ISCC-SUM.",
+          "minimum": 1,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "code_type": {
+          "$ref": "#/$defs/IsccCodeType",
+          "description": "The ISCC code type."
+        },
+        "implementation": {
+          "description": "Software and version that computed the codes, e.g. 'omero-annotate-ai 0.6.0 (iscc-lib 0.7.1)'.",
+          "type": "string"
+        },
+        "pixels": {
+          "description": "Which pixels were coded, e.g. 'the annotated region as saved in input_file' or 'all planes of the source image'.",
+          "type": "string"
+        },
+        "preparation": {
+          "description": "What was done to the pixels before coding: plane order and byte encoding, projection, resizing, intensity scaling, mask binarisation. 'none' if the stored pixels were coded as they are.",
+          "type": "string"
+        },
+        "specification": {
+          "description": "The specification the preparation follows, if any, e.g. https://ieps.iscc.codes/iep-0018/ (IMAGEWALK) for bioimage ISCC-SUMs.",
+          "format": "uri",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "code_type",
+        "pixels",
+        "preparation",
+        "implementation"
+      ],
+      "title": "CodeMethod",
+      "type": "object"
+    },
+    "ContentCodes": {
+      "additionalProperties": false,
+      "description": "How the ISCC codes (ISO 24138) in the records were made. ISCC is a family of codes: the same image gives different codes depending on the code type, which pixels are coded and how they are prepared, so each kind is declared here.",
+      "properties": {
+        "image": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CodeMethod"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "How image_iscc (the code of the whole source image) was made."
+        },
+        "region": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CodeMethod"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "How input_iscc and mask_iscc were made."
+        }
+      },
+      "title": "ContentCodes",
+      "type": "object"
+    },
     "Coverage": {
-      "description": "",
+      "description": "How completely the objects in an annotated region are annotated.",
       "enum": [
         "all",
         "representative",
@@ -565,12 +688,14 @@
     },
     "Grant": {
       "additionalProperties": false,
-      "description": "",
+      "description": "A grant that funded the study.",
       "properties": {
         "funder": {
+          "description": "Name of the funding body.",
           "type": "string"
         },
         "id": {
+          "description": "Identifier of the grant.",
           "type": "string"
         }
       },
@@ -581,8 +706,18 @@
       "title": "Grant",
       "type": "object"
     },
+    "IsccCodeType": {
+      "description": "ISCC code types used for images.",
+      "enum": [
+        "image_code",
+        "iscc_sum",
+        "iscc_code"
+      ],
+      "title": "IsccCodeType",
+      "type": "string"
+    },
     "License": {
-      "description": "",
+      "description": "Licenses the BioImage Archive accepts for annotations.",
       "enum": [
         "CC-BY-4.0",
         "CC0-1.0"
@@ -592,15 +727,17 @@
     },
     "Link": {
       "additionalProperties": false,
-      "description": "",
+      "description": "A web page about the set or its data.",
       "properties": {
         "description": {
+          "description": "What the linked page contains.",
           "type": [
             "string",
             "null"
           ]
         },
         "url": {
+          "description": "URL of the page.",
           "format": "uri",
           "type": "string"
         }
@@ -612,7 +749,7 @@
       "type": "object"
     },
     "MaskKind": {
-      "description": "",
+      "description": "How pixel values in a segmentation mask are assigned.",
       "enum": [
         "instance",
         "semantic"
@@ -625,6 +762,7 @@
       "description": "How the annotations were made.",
       "properties": {
         "annotation_types": {
+          "description": "Kinds of annotation in the set, using MIFA's values.",
           "items": {
             "$ref": "#/$defs/AnnotationType"
           },
@@ -688,7 +826,8 @@
             {
               "type": "null"
             }
-          ]
+          ],
+          "description": "Whether annotations were drawn by hand, proposed by software and corrected, or made by software alone."
         },
         "method_description": {
           "description": "How the annotations were created, in words: who, which software, consensus and quality checks.",
@@ -705,6 +844,7 @@
           ]
         },
         "tools": {
+          "description": "Software used to make the annotations.",
           "items": {
             "$ref": "#/$defs/Tool"
           },
@@ -726,15 +866,18 @@
       "description": "An AI model that proposed annotations.",
       "properties": {
         "doi": {
+          "description": "DOI of the model.",
           "type": [
             "string",
             "null"
           ]
         },
         "name": {
+          "description": "Name of the model, e.g. vit_b_lm.",
           "type": "string"
         },
         "url": {
+          "description": "Where the model can be found, e.g. a BioImage Model Zoo page.",
           "format": "uri",
           "type": [
             "string",
@@ -742,6 +885,7 @@
           ]
         },
         "version": {
+          "description": "Version of the model.",
           "type": [
             "string",
             "null"
@@ -759,15 +903,18 @@
       "description": "Intensity normalisation intended for model input.",
       "properties": {
         "clip": {
+          "description": "True if values outside [0, 1] are clipped.",
           "type": [
             "boolean",
             "null"
           ]
         },
         "method": {
-          "$ref": "#/$defs/NormalizationMethod"
+          "$ref": "#/$defs/NormalizationMethod",
+          "description": "Normalisation method."
         },
         "percentile_high": {
+          "description": "Upper percentile, mapped to 1.",
           "maximum": 100,
           "minimum": 0,
           "type": [
@@ -776,6 +923,7 @@
           ]
         },
         "percentile_low": {
+          "description": "Lower percentile, mapped to 0.",
           "maximum": 100,
           "minimum": 0,
           "type": [
@@ -791,7 +939,7 @@
       "type": "object"
     },
     "NormalizationMethod": {
-      "description": "",
+      "description": "Intensity normalisation methods.",
       "enum": [
         "percentile",
         "none"
@@ -801,15 +949,17 @@
     },
     "Organisation": {
       "additionalProperties": false,
-      "description": "",
+      "description": "An organisation a person is affiliated with.",
       "properties": {
         "address": {
+          "description": "Postal address of the organisation.",
           "type": [
             "string",
             "null"
           ]
         },
         "name": {
+          "description": "Name of the organisation.",
           "type": "string"
         },
         "ror": {
@@ -832,10 +982,12 @@
       "description": "Present if annotations cover patches rather than whole planes.",
       "properties": {
         "height": {
+          "description": "Patch height in pixels.",
           "minimum": 1,
           "type": "integer"
         },
         "per_image": {
+          "description": "Number of patches per image plane.",
           "minimum": 1,
           "type": [
             "integer",
@@ -843,12 +995,14 @@
           ]
         },
         "random": {
+          "description": "True if patch positions were drawn at random, false if they tile the plane.",
           "type": [
             "boolean",
             "null"
           ]
         },
         "width": {
+          "description": "Patch width in pixels.",
           "minimum": 1,
           "type": "integer"
         }
@@ -862,9 +1016,10 @@
     },
     "Person": {
       "additionalProperties": false,
-      "description": "",
+      "description": "A person: an author of the set or an annotator.",
       "properties": {
         "affiliations": {
+          "description": "Organisations the person is affiliated with.",
           "items": {
             "$ref": "#/$defs/Organisation"
           },
@@ -874,12 +1029,14 @@
           ]
         },
         "email": {
+          "description": "Email address.",
           "type": [
             "string",
             "null"
           ]
         },
         "first_name": {
+          "description": "Given name.",
           "type": "string"
         },
         "last_name": {
@@ -917,7 +1074,8 @@
       "description": "Which timepoints or z-slices were annotated.",
       "properties": {
         "mode": {
-          "$ref": "#/$defs/SelectionMode"
+          "$ref": "#/$defs/SelectionMode",
+          "description": "How the planes were chosen."
         },
         "n": {
           "description": "How many were drawn, for mode 'random'.",
@@ -946,7 +1104,7 @@
     },
     "Publication": {
       "additionalProperties": false,
-      "description": "",
+      "description": "A publication associated with the study.",
       "properties": {
         "authors": {
           "description": "Author list as written in the reference.",
@@ -960,15 +1118,18 @@
           ]
         },
         "pubmed_id": {
+          "description": "PubMed identifier.",
           "type": [
             "string",
             "null"
           ]
         },
         "title": {
+          "description": "Title of the publication.",
           "type": "string"
         },
         "year": {
+          "description": "Year of publication.",
           "type": [
             "integer",
             "null"
@@ -983,7 +1144,7 @@
       "type": "object"
     },
     "RecordStatus": {
-      "description": "",
+      "description": "State of an annotation record.",
       "enum": [
         "pending",
         "annotated",
@@ -1022,7 +1183,8 @@
             {
               "type": "null"
             }
-          ]
+          ],
+          "description": "Patch size and number, if annotations cover patches."
         },
         "timepoints": {
           "anyOf": [
@@ -1032,7 +1194,8 @@
             {
               "type": "null"
             }
-          ]
+          ],
+          "description": "Which timepoints were annotated."
         },
         "volumetric": {
           "description": "True if annotations are 3D volumes rather than 2D planes.",
@@ -1049,14 +1212,15 @@
             {
               "type": "null"
             }
-          ]
+          ],
+          "description": "Which z-slices were annotated."
         }
       },
       "title": "Sampling",
       "type": "object"
     },
     "SelectionMode": {
-      "description": "",
+      "description": "How timepoints or z-slices were chosen.",
       "enum": [
         "all",
         "random",
@@ -1077,6 +1241,7 @@
           ]
         },
         "ended": {
+          "description": "When the session ended; absent while it is open.",
           "format": "date-time",
           "type": [
             "string",
@@ -1084,6 +1249,7 @@
           ]
         },
         "id": {
+          "description": "Number of the session within the set, from 0.",
           "minimum": 0,
           "type": "integer"
         },
@@ -1099,6 +1265,7 @@
           ]
         },
         "n_annotated": {
+          "description": "Number of annotations saved in the session.",
           "minimum": 0,
           "type": [
             "integer",
@@ -1106,6 +1273,7 @@
           ]
         },
         "note": {
+          "description": "Free-text note by the annotator.",
           "type": [
             "string",
             "null"
@@ -1119,6 +1287,7 @@
           ]
         },
         "started": {
+          "description": "When the session started.",
           "format": "date-time",
           "type": "string"
         },
@@ -1130,7 +1299,8 @@
             {
               "type": "null"
             }
-          ]
+          ],
+          "description": "State of the session."
         }
       },
       "required": [
@@ -1142,7 +1312,7 @@
       "type": "object"
     },
     "SessionKind": {
-      "description": "",
+      "description": "What a session did.",
       "enum": [
         "annotate",
         "review"
@@ -1151,7 +1321,7 @@
       "type": "string"
     },
     "SessionStatus": {
-      "description": "",
+      "description": "State of a session.",
       "enum": [
         "open",
         "finished",
@@ -1165,6 +1335,7 @@
       "description": "The image dataset the annotated images come from.",
       "properties": {
         "description": {
+          "description": "What the source images are, in words.",
           "type": "string"
         },
         "identifier": {
@@ -1175,12 +1346,14 @@
           ]
         },
         "license": {
+          "description": "License of the source images, e.g. CC-BY-4.0.",
           "type": [
             "string",
             "null"
           ]
         },
         "url": {
+          "description": "Web page or download address of the dataset.",
           "format": "uri",
           "type": [
             "string",
@@ -1221,7 +1394,8 @@
             {
               "type": "null"
             }
-          ]
+          ],
+          "description": "How the split was decided."
         },
         "stratify_by": {
           "description": "Metadata keys the split was balanced on (e.g. cell_line, treatment).",
@@ -1245,7 +1419,7 @@
       "type": "object"
     },
     "SplitName": {
-      "description": "",
+      "description": "The splits of a set.",
       "enum": [
         "training",
         "validation",
@@ -1255,7 +1429,7 @@
       "type": "string"
     },
     "SplitStrategy": {
-      "description": "",
+      "description": "How annotations were assigned to splits.",
       "enum": [
         "random_split",
         "expert_review",
@@ -1269,24 +1443,28 @@
       "description": "Biological and experimental context of the images.",
       "properties": {
         "acknowledgements": {
+          "description": "People or groups to acknowledge.",
           "type": [
             "string",
             "null"
           ]
         },
         "description": {
+          "description": "Brief description of the study, including the biological application of the images.",
           "type": [
             "string",
             "null"
           ]
         },
         "funding_statement": {
+          "description": "How the study was funded, in words.",
           "type": [
             "string",
             "null"
           ]
         },
         "grants": {
+          "description": "Grants that funded the study.",
           "items": {
             "$ref": "#/$defs/Grant"
           },
@@ -1296,18 +1474,21 @@
           ]
         },
         "imaging_method": {
+          "description": "Imaging method, e.g. confocal fluorescence microscopy.",
           "type": [
             "string",
             "null"
           ]
         },
         "organism": {
+          "description": "Organism the samples come from, e.g. Homo sapiens.",
           "type": [
             "string",
             "null"
           ]
         },
         "publications": {
+          "description": "Publications associated with the study.",
           "items": {
             "$ref": "#/$defs/Publication"
           },
@@ -1317,6 +1498,7 @@
           ]
         },
         "title": {
+          "description": "Title of the study; often the title of the associated publication.",
           "type": "string"
         }
       },
@@ -1328,7 +1510,7 @@
     },
     "Tool": {
       "additionalProperties": false,
-      "description": "",
+      "description": "Software used to make the annotations.",
       "properties": {
         "mode": {
           "anyOf": [
@@ -1338,7 +1520,8 @@
             {
               "type": "null"
             }
-          ]
+          ],
+          "description": "How the software was used."
         },
         "model": {
           "anyOf": [
@@ -1348,9 +1531,11 @@
             {
               "type": "null"
             }
-          ]
+          ],
+          "description": "The AI model the software used, if any."
         },
         "name": {
+          "description": "Name of the software, e.g. micro-sam or cellpose.",
           "type": "string"
         },
         "parameters": {
@@ -1361,9 +1546,11 @@
             {
               "type": "null"
             }
-          ]
+          ],
+          "description": "Settings the software ran with, as the tool names them."
         },
         "version": {
+          "description": "Version of the software.",
           "type": [
             "string",
             "null"
@@ -1377,7 +1564,7 @@
       "type": "object"
     },
     "ToolMode": {
-      "description": "",
+      "description": "How a tool was used.",
       "enum": [
         "automatic",
         "interactive",
@@ -1404,6 +1591,7 @@
       ]
     },
     "authors": {
+      "description": "Authors of the set, in citation order.",
       "items": {
         "$ref": "#/$defs/Person"
       },
@@ -1429,12 +1617,24 @@
         "null"
       ]
     },
+    "content_codes": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ContentCodes"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "How the ISCC codes in the records were made. Required when any record has input_iscc, mask_iscc or image_iscc: codes are only comparable when they were made the same way."
+    },
     "created": {
       "description": "When the set was created.",
       "format": "date-time",
       "type": "string"
     },
     "description": {
+      "description": "What the set contains and what it is for, in a few sentences.",
       "type": [
         "string",
         "null"
@@ -1452,6 +1652,7 @@
       "description": "Tool- or project-specific metadata this schema does not cover, under a namespace key such as the tool name."
     },
     "keywords": {
+      "description": "Keywords or tags that describe the set.",
       "items": {
         "type": "string"
       },
@@ -1475,7 +1676,8 @@
       ]
     },
     "methodology": {
-      "$ref": "#/$defs/Methodology"
+      "$ref": "#/$defs/Methodology",
+      "description": "How the annotations were made."
     },
     "name": {
       "description": "Short name of the set.",
@@ -1489,7 +1691,8 @@
         {
           "type": "null"
         }
-      ]
+      ],
+      "description": "Intensity normalisation intended for model input."
     },
     "notes": {
       "description": "Free text - context, caveats, known issues.",
@@ -1513,7 +1716,8 @@
         {
           "type": "null"
         }
-      ]
+      ],
+      "description": "Which channels, planes and regions of the images were annotated."
     },
     "schema_version": {
       "description": "Version of this schema the document follows (semantic versioning).",
@@ -1538,7 +1742,8 @@
         {
           "type": "null"
         }
-      ]
+      ],
+      "description": "The image dataset the annotated images come from."
     },
     "split": {
       "anyOf": [
@@ -1548,7 +1753,8 @@
         {
           "type": "null"
         }
-      ]
+      ],
+      "description": "How the annotations were divided over training, validation and test."
     },
     "study": {
       "anyOf": [
@@ -1558,7 +1764,8 @@
         {
           "type": "null"
         }
-      ]
+      ],
+      "description": "The biological and experimental context of the images."
     },
     "version": {
       "description": "Version of this set, e.g. \"1\" or \"1.1\".",

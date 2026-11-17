@@ -10,7 +10,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from .io import SchemaError, read_records, read_set
+from .io import SchemaError, check_documents, read_records, read_set
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -30,6 +30,9 @@ def main(argv: list[str] | None = None) -> int:
         annotation_set, records = read_set(args.folder), read_records(args.folder)
     except SchemaError as error:
         print(error, file=sys.stderr)
+        return 1
+    if problems := check_documents(annotation_set, records):
+        print("\n".join(problems), file=sys.stderr)
         return 1
     if args.command == "validate":
         print(f"OK: {annotation_set.name}, {len(records)} records")

@@ -8,8 +8,11 @@ jobs:
       - uses: prefix-dev/setup-pixi@v0.8.1
         with:
           locked: true
+          environments: default docs
       - name: Generated files are up to date
         run: |
           pixi run gen
           git diff --exit-code src/bioimage_annotation_schema
       - run: pixi run test
+      - name: Documentation builds
+        run: pixi run -e docs docs-build

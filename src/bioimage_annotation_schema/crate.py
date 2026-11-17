@@ -7,8 +7,9 @@ workflow tools read. For an annotation set it lists:
 - the set (name, description, licence, authors) as the root dataset,
 - the files: the set document, the records table, each annotated image region and
   each mask, with the pixel SHA-256 digest and ISCC code when recorded,
-- the source images by URI; a URI that is not an OMERO or web address (a local
-  path, which may hold a user name) gets a ``#source-<hash>`` id instead,
+- the source images by URI, with their ISCC code when recorded; a URI that is not
+  an OMERO or web address (a local path, which may hold a user name) gets a
+  ``#source-<hash>`` id instead,
 - every annotation session as an action: who, when, which software and model, its
   note, and the masks it saved (an annotate session is a ``CreateAction``, a review
   an ``UpdateAction``).
@@ -24,7 +25,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, cast
 
-from .datamodel import AnnotationRecord, AnnotationSet, Session
+from .datamodel import AnnotationRecord, AnnotationSet, CodeMethod, Session
 from .io import RECORDS_FILE, SCHEMA_VERSION, SET_FILE
 
 METADATA_FILE = "ro-crate-metadata.json"
@@ -102,9 +103,11 @@ def _inside(folder: Path, relative: str | None) -> Path | None:
 class _Graph:
     """Collects entities by ``@id``; the first one written for an id wins."""
 
-    def __init__(self, folder: Path) -> None:
+    def __init__(self, folder: Path, annotation_set: AnnotationSet) -> None:
         self.folder = folder.resolve()
         self.entities: dict[str, Entity] = {}
+        codes = annotation_set.content_codes
+        self.region_code = codes.region if codes else None
 
     def add(self, entity: Entity) -> dict[str, str]:
         self.entities.setdefault(entity["@id"], entity)
@@ -144,7 +147,7 @@ class _Graph:
                         "@id": f"#{owner}-iscc",
                         "@type": "PropertyValue",
                         "propertyID": "iscc",
-                        "name": "ISCC Image-Code (ISO 24138)",
+                        "name": _code_name(self.region_code),
                         "value": iscc,
                     }
                 )
@@ -155,6 +158,13 @@ class _Graph:
         return self.add(
             {"@id": _local_id("software", text), "@type": "SoftwareApplication", "name": text}
         )
+
+
+def _code_name(method: CodeMethod | None) -> str:
+    """How an ISCC code was made, from the set's content_codes."""
+    if method is None:
+        return "ISCC code (ISO 24138)"
+    return f"ISCC {method.code_type} of {method.pixels}; {method.preparation} ({method.implementation})"
 
 
 def _session_action(graph: _Graph, session: Session, masks: list[dict[str, str]]) -> Entity:
@@ -222,18 +232,19 @@ def build_ro_crate(
     that were never saved locally appear as source images only.
     """
     folder = Path(folder)
-    graph = _Graph(folder)
+    graph = _Graph(folder, annotation_set)
     parts = [graph.file(p) for name in metadata_files if (p := _inside(folder, name))]
 
     masks_by_session: dict[int, list[dict[str, str]]] = {}
     for record in records:
-        source = graph.add(
-            {
-                "@id": _source_id(record.image_uri),
-                "@type": "ImageObject",
-                "name": record.image_name or record.image_uri,
-            }
-        )
+        source_entity: Entity = {
+            "@id": _source_id(record.image_uri),
+            "@type": "ImageObject",
+            "name": record.image_name or record.image_uri,
+        }
+        if record.image_iscc:
+            source_entity["identifier"] = record.image_iscc
+        source = graph.add(source_entity)
         based_on = [source]
         if image := _inside(folder, record.input_file):
             image_ref = graph.file(

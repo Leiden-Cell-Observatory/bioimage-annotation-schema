@@ -1,0 +1,48 @@
+[project]
+site_name = "Bioimage Annotation Schema"
+site_description = "A metadata schema for sets of image annotations made for AI, mapped to MIFA."
+repo_url = "https://github.com/Leiden-Cell-Observatory/bioimage-annotation-schema"
+repo_name = "bioimage-annotation-schema"
+docs_dir = "docs"
+site_dir = "site"
+strict = true
+extra_css = ["assets/model-browser.css"]
+extra_javascript = ["assets/model-browser.js"]
+not_in_nav = """
+/reference/
+"""
+nav = [
+  { "Home" = "index.md" },
+  { "Overview" = "overview.md" },
+  { "Model browser" = "model.md" },
+  { "MIFA crosswalk" = "mifa.md" },
+  { "Reference" = "reference/index.md" },
+]
+
+[project.theme]
+features = ["navigation.sections", "navigation.top", "search.suggest", "content.code.copy"]
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: light)"
+scheme = "default"
+primary = "teal"
+toggle.icon = "lucide/sun"
+toggle.name = "Switch to dark mode"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: dark)"
+scheme = "slate"
+primary = "teal"
+toggle.icon = "lucide/moon"
+toggle.name = "Switch to light mode"
+
+[project.markdown_extensions]
+tables = {}
+attr_list = {}
+md_in_html = {}
+admonition = {}
+pymdownx.highlight = {}
+pymdownx.snippets = { check_paths = true }
+pymdownx.superfences.custom_fences = [
+  { name = "mermaid", class = "mermaid", format = "pymdownx.superfences.fence_code_format" },
+]
