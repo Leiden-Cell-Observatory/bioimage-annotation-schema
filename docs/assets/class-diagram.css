@@ -1,0 +1,32 @@
+#diagram-view { position: relative; }
+.cd-stage {
+  height: calc(100vh - 16rem);
+  min-height: 24rem;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 0.2rem;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+  background: var(--md-default-bg-color);
+}
+.cd-stage.cd-dragging { cursor: grabbing; }
+.cd-stage svg { display: block; user-select: none; }
+.cd-tools {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 1;
+  display: flex;
+  gap: 0.25rem;
+}
+.cd-tools button {
+  width: 2rem;
+  height: 2rem;
+  font-size: 1rem;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 0.2rem;
+  background: var(--md-default-bg-color);
+  color: var(--md-default-fg-color);
+  cursor: pointer;
+}
+.cd-tools button:hover { border-color: var(--md-accent-fg-color); }

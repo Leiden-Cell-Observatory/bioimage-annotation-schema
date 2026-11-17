@@ -67,8 +67,9 @@ The MIFA export needs `bia-mifa-models`, which is not on PyPI:
 
 ## Documentation
 
-The documentation site has an overview of both documents as a tree, an interactive
-model browser, the MIFA crosswalk and a reference page per class, field and value
+The [documentation site](https://wiki.cellobservatory.nl/bioimage-annotation-schema/)
+has an overview of both documents as a tree, a class diagram you can zoom and pan,
+an interactive model browser, the MIFA crosswalk and a reference page per class, field and value
 list, all generated from the schema:
 
 ```bash

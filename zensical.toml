@@ -6,8 +6,8 @@ repo_name = "bioimage-annotation-schema"
 docs_dir = "docs"
 site_dir = "site"
 strict = true
-extra_css = ["assets/model-browser.css"]
-extra_javascript = ["assets/model-browser.js"]
+extra_css = ["assets/model-browser.css", "assets/class-diagram.css"]
+extra_javascript = ["assets/model-browser.js", "assets/class-diagram.js"]
 not_in_nav = """
 /reference/
 """
@@ -15,6 +15,7 @@ nav = [
   { "Home" = "index.md" },
   { "Overview" = "overview.md" },
   { "Model browser" = "model.md" },
+  { "Class diagram" = "diagram.md" },
   { "MIFA crosswalk" = "mifa.md" },
   { "Reference" = "reference/index.md" },
 ]
