@@ -16,3 +16,6 @@ fixes descriptions or loosens constraints.
   transformations. Licence limited to CC-BY-4.0 and CC0-1.0.
 - `check_mifa` / `bas validate --mifa`; the MIFA export no longer fills in
   placeholders and its output passes MIFA's own validator.
+- Documentation site (MkDocs): overview tree and class diagram, interactive model
+  browser, MIFA crosswalk and LinkML reference pages, all generated from the schema.
+  Every class, field and allowed value has a description.

@@ -65,11 +65,22 @@ rather than filling in a placeholder. The written documents pass MIFA's own
 The MIFA export needs `bia-mifa-models`, which is not on PyPI:
 `pip install "git+https://github.com/BioImage-Archive/bia-mifa-models.git@v1.1.5"`.
 
+## Documentation
+
+The documentation site has an overview of both documents as a tree, an interactive
+model browser, the MIFA crosswalk and a reference page per class, field and value
+list, all generated from the schema:
+
+```bash
+pixi run -e docs docs-serve   # http://127.0.0.1:8000
+```
+
 ## Develop
 
 ```bash
 pixi run gen    # regenerate JSON Schema and Pydantic models after editing the LinkML file
 pixi run test   # examples validate; broken examples are rejected
+pixi run -e docs docs-build   # documentation, built strictly (also in CI)
 ```
 
 ## Implementations

@@ -25,3 +25,14 @@ tour = "marimo edit notebooks/tour.py"
 [pypi-dependencies]
 bia-mifa-models = { git = "https://github.com/BioImage-Archive/bia-mifa-models.git", tag = "v1.1.5" }
 bioimage-annotation-schema = { path = ".", editable = true }
+
+[feature.docs.dependencies]
+mkdocs-material = "*"
+
+[feature.docs.tasks]
+docs-gen = "python docs/build.py"
+docs-serve = { cmd = "mkdocs serve", depends-on = ["docs-gen"] }
+docs-build = { cmd = "mkdocs build --strict", depends-on = ["docs-gen"] }
+
+[environments]
+docs = ["docs"]
