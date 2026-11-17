@@ -2,6 +2,8 @@ name: Docs
 # Publishes the documentation to GitHub Pages. Needs Pages enabled with
 # "GitHub Actions" as source (Settings > Pages).
 on:
+  push:
+    branches: [main]
   release:
     types: [published]
   workflow_dispatch:

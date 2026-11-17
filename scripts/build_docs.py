@@ -102,10 +102,15 @@ def tree(data: dict, cls: str, depth: int = 0, shown: set[str] | None = None) ->
     return lines
 
 
-def overview(data: dict) -> str:
-    er = subprocess.run(
+def er_diagram() -> str:
+    """The classes as a Mermaid ER diagram (gen-erdiagram wraps it in a code fence)."""
+    out = subprocess.run(
         ["gen-erdiagram", str(SCHEMA)], check=True, capture_output=True, text=True
     ).stdout
+    return "\n".join(line for line in out.splitlines() if not line.startswith("```")) + "\n"
+
+
+def overview(data: dict) -> str:
     parts = [
         "# Overview\n",
         "The schema has two documents. Each tree below lists every field; "
@@ -115,7 +120,10 @@ def overview(data: dict) -> str:
     for root in data["roots"]:
         parts += [f"## {root}\n", data["classes"][root]["description"] + "\n"]
         parts += ["```text", root, *("    " + line for line in tree(data, root)), "```\n"]
-    parts += ["## How the classes connect\n", er]
+    parts += [
+        "## How the classes connect\n",
+        "The [class diagram](diagram.md) shows every class and how they link.\n",
+    ]
     return "\n".join(parts)
 
 
@@ -156,6 +164,7 @@ def main() -> None:
     (DOCS / "data").mkdir(exist_ok=True)
     (DOCS / "data/model.json").write_text(json.dumps(data, indent=1), encoding="utf-8")
     (DOCS / "overview.md").write_text(overview(data), encoding="utf-8")
+    (DOCS / "data/classes.mmd").write_text(er_diagram(), encoding="utf-8")
     (DOCS / "mifa.md").write_text(crosswalk(data), encoding="utf-8")
     reference = DOCS / "reference"
     shutil.rmtree(reference, ignore_errors=True)

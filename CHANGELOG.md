@@ -23,6 +23,6 @@ fixes descriptions or loosens constraints.
   `check_documents` (run by `bas validate`) requires it, and checks that records
   name existing sessions. The pixel digest's description says how it differs from
   IMAGEWALK (IEP-0018).
-- Documentation site (Zensical): overview tree and class diagram, interactive model
+- Documentation site (Zensical): overview tree, class diagram you can zoom and pan, interactive model
   browser, MIFA crosswalk and LinkML reference pages, all generated from the schema.
   Every class, field and allowed value has a description.
