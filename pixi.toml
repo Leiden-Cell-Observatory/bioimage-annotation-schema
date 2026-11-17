@@ -24,6 +24,8 @@ tour = "marimo edit notebooks/tour.py"
 
 [pypi-dependencies]
 bia-mifa-models = { git = "https://github.com/BioImage-Archive/bia-mifa-models.git", tag = "v1.1.5" }
+mlcroissant = ">=1.0"
+"bioimageio.spec" = ">=0.5"
 bioimage-annotation-schema = { path = ".", editable = true }
 
 [feature.docs.dependencies]

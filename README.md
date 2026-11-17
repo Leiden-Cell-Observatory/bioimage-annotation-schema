@@ -8,7 +8,8 @@ and one record per annotation.
 - **Generated:** JSON Schema in [`schema/0.1/`](src/bioimage_annotation_schema/schema/0.1/) and Pydantic models in
   `bioimage_annotation_schema.datamodel` (`pixi run gen`).
 - **Python library and `bas` command:** read, write and validate the documents, and export
-  them to RO-Crate and to a BioImage Archive bundle with MIFA metadata.
+  them to RO-Crate, to Croissant (MLCommons), to a bioimage.io dataset description and to a
+  BioImage Archive bundle with MIFA metadata.
 - **Examples:** [`examples/0.1/`](examples/0.1/): an annotation set (YAML) and its records (CSV).
 - **MIFA:** fields that correspond to MIFA ([bia-mifa-models](https://github.com/BioImage-Archive/bia-mifa-models),
   BioImage Archive) carry LinkML mappings to it, and `annotation_types` uses MIFA's values.
@@ -42,16 +43,22 @@ through reading, breaking, building and exporting a set.
 bas validate my-set/             # check both documents
 bas validate --mifa my-set/      # also list what MIFA still needs (funding, keywords, …)
 bas ro-crate my-set/             # write my-set/ro-crate-metadata.json
+bas croissant my-set/            # write my-set/croissant.json (Croissant 1.1, with RAI)
+bas bioimageio my-set/           # write my-set/rdf.yaml (bioimage.io dataset 0.3)
 bas bia my-set/ bia-bundle/      # BioImage Archive bundle: MIFA YAML, file lists, data
 ```
 
 ```python
 from bioimage_annotation_schema import read_set, read_records, write_set, write_records
+from bioimage_annotation_schema.bioimageio import write_bioimageio_dataset
 from bioimage_annotation_schema.crate import write_ro_crate
+from bioimage_annotation_schema.croissant import write_croissant
 from bioimage_annotation_schema.mifa import save_bia_package
 
 annotation_set, records = read_set("my-set"), read_records("my-set")   # validated
 write_ro_crate(annotation_set, records, "my-set")
+write_croissant(annotation_set, records, "my-set")
+write_bioimageio_dataset(annotation_set, records, "my-set")
 ```
 
 Any JSON Schema validator works too, as does
@@ -64,6 +71,25 @@ rather than filling in a placeholder. The written documents pass MIFA's own
 
 The MIFA export needs `bia-mifa-models`, which is not on PyPI:
 `pip install "git+https://github.com/BioImage-Archive/bia-mifa-models.git@v1.1.5"`.
+
+The Croissant and bioimage.io exports follow the same rule: a set that lacks what the
+format asks for (a description, authors, a link; for bioimage.io also keywords and a
+publication with a DOI) is refused with the names of the missing fields.
+
+- **Croissant** (`croissant.json`): the set as a `sc:Dataset`, its files, and record sets
+  that load in [mlcroissant](https://pypi.org/project/mlcroissant/). `annotations` has one
+  record per mask that is in the folder, with the columns of the records table; pending and
+  excluded records are left out. The split is a `cr:Split` record set, the classes an
+  enumeration, the sessions PROV activities. What Croissant has no property for
+  (methodology, sampling, split unit and rationale, normalisation) is written in words
+  under the Croissant RAI properties and as data under this schema's own terms (`bas:`).
+- **bioimage.io** (`rdf.yaml`): name, description, authors, citations, licence, tags,
+  version and source of a dataset description. The format has no fields for the rest, so
+  the whole set is kept under `config.bioimage_annotation_schema` and the two documents
+  are listed as attachments.
+
+Neither export needs an extra package. The tests check the files with `mlcroissant` and
+`bioimageio.spec`, which are in the pixi environment.
 
 ## Documentation
 

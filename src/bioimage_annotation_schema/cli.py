@@ -1,4 +1,4 @@
-"""Command line: ``bas validate``, ``bas ro-crate``, ``bas bia``.
+"""Command line: ``bas validate``, ``bas ro-crate``, ``bas croissant``, ``bas bioimageio``, ``bas bia``.
 
 Each command takes an annotation set's folder (holding annotation-set.yaml and
 annotation-records.csv), so tools in any language can use the exports.
@@ -20,6 +20,10 @@ def main(argv: list[str] | None = None) -> int:
     validate.add_argument("folder", type=Path)
     validate.add_argument("--mifa", action="store_true", help="also check MIFA's required fields")
     commands.add_parser("ro-crate", help="write ro-crate-metadata.json").add_argument("folder", type=Path)
+    commands.add_parser("croissant", help="write croissant.json").add_argument("folder", type=Path)
+    commands.add_parser(
+        "bioimageio", help="write rdf.yaml, a bioimage.io dataset description"
+    ).add_argument("folder", type=Path)
     bia = commands.add_parser("bia", help="build a BioImage Archive bundle with MIFA metadata")
     bia.add_argument("folder", type=Path)
     bia.add_argument("dest", type=Path)
@@ -47,6 +51,22 @@ def main(argv: list[str] | None = None) -> int:
         from .crate import write_ro_crate
 
         print(write_ro_crate(annotation_set, records, args.folder))
+    elif args.command == "croissant":
+        from .croissant import CroissantNotReady, write_croissant
+
+        try:
+            print(write_croissant(annotation_set, records, args.folder))
+        except CroissantNotReady as error:
+            print(error, file=sys.stderr)
+            return 1
+    elif args.command == "bioimageio":
+        from .bioimageio import BioimageioNotReady, write_bioimageio_dataset
+
+        try:
+            print(write_bioimageio_dataset(annotation_set, records, args.folder))
+        except BioimageioNotReady as error:
+            print(error, file=sys.stderr)
+            return 1
     else:
         from .mifa import MifaNotReady, save_bia_package
 
