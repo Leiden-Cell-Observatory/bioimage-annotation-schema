@@ -38,6 +38,7 @@ BUNDLE_IMAGE_DIR = "images"
 BUNDLE_ANNOTATION_DIR = "annotations"
 
 _LICENSES = {"CC-BY-4.0": "CC_BY", "CC0-1.0": "CC0"}
+NOT_DESCRIBED = "Not described."
 
 
 class MifaNotReady(ValueError):
@@ -134,6 +135,19 @@ def compose_split(annotation_set: AnnotationSet, records: Sequence[AnnotationRec
     return text + "."
 
 
+def compose_normalization(annotation_set: AnnotationSet) -> str | None:
+    """One sentence on the intensity normalisation intended for model input."""
+    norm = annotation_set.normalization
+    if not norm:
+        return None
+    if norm.method != "percentile":
+        return "Model input: raw intensities."
+    return (
+        f"Model input normalisation: per-image percentiles {norm.percentile_low}-"
+        f"{norm.percentile_high} mapped to [0, 1]" + (", clipped." if norm.clip else ".")
+    )
+
+
 def compose_method(annotation_set: AnnotationSet, records: Sequence[AnnotationRecord]) -> str:
     """MIFA ``annotation_method``: the set's own description followed by the method,
     tools, models, split and normalisation from its structured fields."""
@@ -152,16 +166,9 @@ def compose_method(annotation_set: AnnotationSet, records: Sequence[AnnotationRe
         parts.append(text + ".")
     if records:
         parts.append(compose_split(annotation_set, records))
-    norm = annotation_set.normalization
-    if norm and norm.method == "percentile":
-        parts.append(
-            f"Model input normalisation: per-image percentiles {norm.percentile_low}-"
-            f"{norm.percentile_high} mapped to [0, 1]"
-            + (", clipped." if norm.clip else ".")
-        )
-    elif norm:
-        parts.append("Model input: raw intensities.")
-    return " ".join(parts) or "Not described."
+    if normalization := compose_normalization(annotation_set):
+        parts.append(normalization)
+    return " ".join(parts) or NOT_DESCRIBED
 
 
 def bundle_paths(record: AnnotationRecord) -> tuple[str, str]:

@@ -26,3 +26,9 @@ fixes descriptions or loosens constraints.
 - Documentation site (Zensical): overview tree, class diagram you can zoom and pan, interactive model
   browser, MIFA crosswalk and LinkML reference pages, all generated from the schema.
   Every class, field and allowed value has a description.
+- Croissant export (`write_croissant`, `bas croissant`): `croissant.json` following
+  Croissant 1.1 and Croissant RAI 1.0, with the files, a record per mask, the split as
+  `cr:Split`, classes, sessions, and the fields Croissant has no property for under the
+  RAI properties and the schema's own terms. Loads in `mlcroissant`.
+- bioimage.io export (`write_bioimageio_dataset`, `bas bioimageio`): `rdf.yaml`, a
+  dataset description in format 0.3.4 that validates with `bioimageio.spec`.
