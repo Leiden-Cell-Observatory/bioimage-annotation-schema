@@ -69,6 +69,12 @@ classes:
         slot_uri: schema:keywords
         exact_mappings:
           - mifa:keywords
+      links:
+        description: Web pages about the set or its data, e.g. a repository or publication.
+        range: uri
+        multivalued: true
+        exact_mappings:
+          - mifa:link_url
       study:
         range: Study
         inlined: true

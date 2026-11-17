@@ -12,9 +12,9 @@ import yaml
 from bioimage_annotation_schema.datamodel import AnnotationSet
 
 ROOT = Path(__file__).parent.parent
-SCHEMA = ROOT / "schema" / "0.1"
+SCHEMA = ROOT / "src" / "bioimage_annotation_schema" / "schema" / "0.1"
 EXAMPLES = ROOT / "examples" / "0.1"
-LINKML = ROOT / "src" / "linkml" / "bioimage_annotation_schema.yaml"
+LINKML = ROOT / "src" / "bioimage_annotation_schema" / "schema" / "bioimage_annotation_schema.yaml"
 
 
 def _validator(name: str) -> jsonschema.Draft202012Validator:

@@ -385,6 +385,17 @@
           "description": "License of the annotations, preferably an SPDX identifier (CC-BY-4.0, CC0-1.0).",
           "type": "string"
         },
+        "links": {
+          "description": "Web pages about the set or its data, e.g. a repository or publication.",
+          "items": {
+            "format": "uri",
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
         "methodology": {
           "$ref": "#/$defs/Methodology"
         },

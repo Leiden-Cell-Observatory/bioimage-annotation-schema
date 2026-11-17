@@ -11,5 +11,5 @@ jobs:
       - name: Generated files are up to date
         run: |
           pixi run gen
-          git diff --exit-code schema src/bioimage_annotation_schema/datamodel.py
+          git diff --exit-code src/bioimage_annotation_schema
       - run: pixi run test

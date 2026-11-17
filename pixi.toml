@@ -10,13 +10,15 @@ pydantic = ">=2"
 pytest = "*"
 pyyaml = "*"
 jsonschema = "*"
+hatchling = "*"
 
 [tasks]
-gen-json-set = "gen-json-schema --top-class AnnotationSet --indent 2 src/linkml/bioimage_annotation_schema.yaml > schema/0.1/annotation-set.schema.json"
-gen-json-record = "gen-json-schema --top-class AnnotationRecord --indent 2 src/linkml/bioimage_annotation_schema.yaml > schema/0.1/annotation-record.schema.json"
-gen-pydantic = "gen-pydantic src/linkml/bioimage_annotation_schema.yaml > src/bioimage_annotation_schema/datamodel.py"
+gen-json-set = "gen-json-schema --top-class AnnotationSet --indent 2 src/bioimage_annotation_schema/schema/bioimage_annotation_schema.yaml > src/bioimage_annotation_schema/schema/0.1/annotation-set.schema.json"
+gen-json-record = "gen-json-schema --top-class AnnotationRecord --indent 2 src/bioimage_annotation_schema/schema/bioimage_annotation_schema.yaml > src/bioimage_annotation_schema/schema/0.1/annotation-record.schema.json"
+gen-pydantic = "gen-pydantic src/bioimage_annotation_schema/schema/bioimage_annotation_schema.yaml > src/bioimage_annotation_schema/datamodel.py"
 gen = { depends-on = ["gen-json-set", "gen-json-record", "gen-pydantic"] }
 test = "pytest tests -v"
 
 [pypi-dependencies]
+bia-mifa-models = { git = "https://github.com/BioImage-Archive/bia-mifa-models.git", tag = "v1.1.5" }
 bioimage-annotation-schema = { path = ".", editable = true }

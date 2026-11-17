@@ -92,7 +92,7 @@ linkml_meta = LinkMLMeta({'default_prefix': 'bas',
                   'schema': {'prefix_prefix': 'schema',
                              'prefix_reference': 'http://schema.org/'}},
      'see_also': ['https://github.com/Leiden-Cell-Observatory/bioimage-annotation-schema'],
-     'source_file': 'src/linkml/bioimage_annotation_schema.yaml',
+     'source_file': 'src/bioimage_annotation_schema/schema/bioimage_annotation_schema.yaml',
      'title': 'Bioimage Annotation Schema',
      'types': {'IsccCode': {'description': 'ISCC Image-Code (ISO 24138), for '
                                            'finding near-duplicate images.',
@@ -241,6 +241,7 @@ class AnnotationSet(ConfiguredBaseModel):
     keywords: Optional[list[str]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet'],
          'exact_mappings': ['mifa:keywords'],
          'slot_uri': 'schema:keywords'} })
+    links: Optional[list[str]] = Field(default=None, description="""Web pages about the set or its data, e.g. a repository or publication.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet'], 'exact_mappings': ['mifa:link_url']} })
     study: Optional[Study] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet']} })
     source_dataset: Optional[SourceDataset] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet']} })
     methodology: Methodology = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet']} })

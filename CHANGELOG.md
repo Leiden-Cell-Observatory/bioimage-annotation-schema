@@ -8,3 +8,5 @@ fixes descriptions or loosens constraints.
 
 - First draft: `AnnotationSet` and `AnnotationRecord`, LinkML source with generated
   JSON Schema and Pydantic models, MIFA mappings, examples and tests.
+- Python library and `bas` command: read, write and validate set folders; export to
+  RO-Crate and to a BioImage Archive bundle with MIFA metadata.
