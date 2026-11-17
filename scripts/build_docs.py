@@ -19,7 +19,7 @@ from pathlib import Path
 
 from linkml_runtime.utils.schemaview import SchemaView
 
-DOCS = Path(__file__).parent
+DOCS = Path(__file__).parent.parent / "docs"
 SCHEMA = DOCS.parent / "src/bioimage_annotation_schema/schema/bioimage_annotation_schema.yaml"
 ROOTS = ("AnnotationSet", "AnnotationRecord")
 MIFA_DOCS = "https://bioimage-archive.github.io/bia-mifa-models/"
@@ -170,6 +170,7 @@ def main() -> None:
             str(SCHEMA),
         ],
         check=True,
+        stdout=subprocess.DEVNULL,
     )
 
 

@@ -1,5 +1,5 @@
 // Model browser: a tree of the schema's documents (left) and the details of the
-// selected class or field (right). Reads data/model.json, written by docs/build.py.
+// selected class or field (right). Reads data/model.json, written by scripts/build_docs.py.
 (function () {
   const root = document.getElementById("schema-browser");
   if (!root) return;

@@ -27,12 +27,12 @@ bia-mifa-models = { git = "https://github.com/BioImage-Archive/bia-mifa-models.g
 bioimage-annotation-schema = { path = ".", editable = true }
 
 [feature.docs.dependencies]
-mkdocs-material = "*"
+zensical = "*"
 
 [feature.docs.tasks]
-docs-gen = "python docs/build.py"
-docs-serve = { cmd = "mkdocs serve", depends-on = ["docs-gen"] }
-docs-build = { cmd = "mkdocs build --strict", depends-on = ["docs-gen"] }
+docs-gen = "python scripts/build_docs.py"
+docs-serve = { cmd = "zensical serve", depends-on = ["docs-gen"] }
+docs-build = { cmd = "zensical build --clean", depends-on = ["docs-gen"] }
 
 [environments]
 docs = ["docs"]
