@@ -95,8 +95,10 @@ linkml_meta = LinkMLMeta({'default_prefix': 'bas',
                   'https://bioimage-archive.github.io/bia-mifa-models/'],
      'source_file': 'src/bioimage_annotation_schema/schema/bioimage_annotation_schema.yaml',
      'title': 'Bioimage Annotation Schema',
-     'types': {'IsccCode': {'description': 'ISCC Image-Code (ISO 24138), for '
-                                           'finding near-duplicate images.',
+     'types': {'IsccCode': {'description': 'An ISCC code (ISO 24138) in its '
+                                           'canonical text form. Which code type '
+                                           'and how it was made is declared in the '
+                                           "set's content_codes.",
                             'from_schema': 'https://w3id.org/bioimage-annotation-schema',
                             'name': 'IsccCode',
                             'pattern': '^ISCC:[A-Z2-7]+$',
@@ -110,7 +112,13 @@ linkml_meta = LinkMLMeta({'default_prefix': 'bas',
                                               "(e.g. '<u2', '|u1'), <shape> the "
                                               "Python tuple text (e.g. '(512, "
                                               "512)'). Independent of file format "
-                                              'and compression.',
+                                              'and compression. An exact-match '
+                                              'check of the saved files; not the '
+                                              'IMAGEWALK canonical bytes '
+                                              '(IEP-0018: big-endian, no dtype and '
+                                              'shape prefix), so it does not equal '
+                                              'a SHA-256 another bioimage tool '
+                                              'computes over IMAGEWALK.',
                                'from_schema': 'https://w3id.org/bioimage-annotation-schema',
                                'name': 'PixelDigest',
                                'pattern': '^[0-9a-f]{64}$',
@@ -177,6 +185,24 @@ class AnnotationType(str, Enum):
     other = "other"
     """
     Another kind; describe it in the methodology overview.
+    """
+
+
+class IsccCodeType(str, Enum):
+    """
+    ISCC code types used for images.
+    """
+    image_code = "image_code"
+    """
+    ISCC-UNIT Image-Code - a perceptual code of a small grayscale image; codes of similar images differ in few bits, so it finds near-duplicates.
+    """
+    iscc_sum = "iscc_sum"
+    """
+    ISCC-SUM - Data-Code plus Instance-Code over a byte stream (for bioimages, the IMAGEWALK canonical bytes); the Instance-Code part matches only identical content.
+    """
+    iscc_code = "iscc_code"
+    """
+    A composite ISCC-CODE of several units.
     """
 
 
@@ -412,6 +438,7 @@ class AnnotationSet(ConfiguredBaseModel):
     sampling: Optional[Sampling] = Field(default=None, description="""Which channels, planes and regions of the images were annotated.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet']} })
     split: Optional[Split] = Field(default=None, description="""How the annotations were divided over training, validation and test.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet', 'AnnotationRecord']} })
     normalization: Optional[Normalization] = Field(default=None, description="""Intensity normalisation intended for model input.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet']} })
+    content_codes: Optional[ContentCodes] = Field(default=None, description="""How the ISCC codes in the records were made. Required when any record has input_iscc, mask_iscc or image_iscc: codes are only comparable when they were made the same way.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet']} })
     sessions: Optional[list[Session]] = Field(default=None, description="""Annotation sessions, oldest first. Records refer to them by id.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet']} })
     notes: Optional[str] = Field(default=None, description="""Free text - context, caveats, known issues.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet']} })
     extensions: Optional[Any] = Field(default=None, description="""Tool- or project-specific metadata this schema does not cover, under a namespace key such as the tool name.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet']} })
@@ -754,6 +781,30 @@ class Session(ConfiguredBaseModel):
     note: Optional[str] = Field(default=None, description="""Free-text note by the annotator.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Session']} })
 
 
+class ContentCodes(ConfiguredBaseModel):
+    """
+    How the ISCC codes (ISO 24138) in the records were made. ISCC is a family of codes: the same image gives different codes depending on the code type, which pixels are coded and how they are prepared, so each kind is declared here.
+    """
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://w3id.org/bioimage-annotation-schema'})
+
+    region: Optional[CodeMethod] = Field(default=None, description="""How input_iscc and mask_iscc were made.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ContentCodes']} })
+    image: Optional[CodeMethod] = Field(default=None, description="""How image_iscc (the code of the whole source image) was made.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ContentCodes']} })
+
+
+class CodeMethod(ConfiguredBaseModel):
+    """
+    How one kind of ISCC code was computed.
+    """
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://w3id.org/bioimage-annotation-schema'})
+
+    code_type: IsccCodeType = Field(default=..., description="""The ISCC code type.""", json_schema_extra = { "linkml_meta": {'domain_of': ['CodeMethod']} })
+    bits: Optional[int] = Field(default=None, description="""Length of the code's body in bits, e.g. 64 for an Image-Code unit, 128 or 256 (wide) for an ISCC-SUM.""", ge=1, json_schema_extra = { "linkml_meta": {'domain_of': ['CodeMethod']} })
+    pixels: str = Field(default=..., description="""Which pixels were coded, e.g. 'the annotated region as saved in input_file' or 'all planes of the source image'.""", json_schema_extra = { "linkml_meta": {'domain_of': ['CodeMethod']} })
+    preparation: str = Field(default=..., description="""What was done to the pixels before coding: plane order and byte encoding, projection, resizing, intensity scaling, mask binarisation. 'none' if the stored pixels were coded as they are.""", json_schema_extra = { "linkml_meta": {'domain_of': ['CodeMethod']} })
+    specification: Optional[str] = Field(default=None, description="""The specification the preparation follows, if any, e.g. https://ieps.iscc.codes/iep-0018/ (IMAGEWALK) for bioimage ISCC-SUMs.""", json_schema_extra = { "linkml_meta": {'domain_of': ['CodeMethod']} })
+    implementation: str = Field(default=..., description="""Software and version that computed the codes, e.g. 'omero-annotate-ai 0.6.0 (iscc-lib 0.7.1)'.""", json_schema_extra = { "linkml_meta": {'domain_of': ['CodeMethod']} })
+
+
 class AnnotationRecord(ConfiguredBaseModel):
     """
     One annotation of a set: the image region it covers, its split, its state and its files. Flat, so a table of records is a CSV file with one column per field (well_metadata and external_ids as JSON text).
@@ -810,8 +861,9 @@ class AnnotationRecord(ConfiguredBaseModel):
     mask_file: Optional[str] = Field(default=None, description="""Path of the mask, relative to the set's folder.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationRecord']} })
     input_digest: Optional[str] = Field(default=None, description="""Pixel SHA-256 of the annotated image region.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationRecord']} })
     mask_digest: Optional[str] = Field(default=None, description="""Pixel SHA-256 of the mask.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationRecord']} })
-    input_iscc: Optional[str] = Field(default=None, description="""ISCC Image-Code of the annotated image region.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationRecord']} })
-    mask_iscc: Optional[str] = Field(default=None, description="""ISCC Image-Code of the mask.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationRecord']} })
+    input_iscc: Optional[str] = Field(default=None, description="""ISCC code of the annotated image region, made as declared in the set's content_codes.region.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationRecord']} })
+    mask_iscc: Optional[str] = Field(default=None, description="""ISCC code of the mask, made as declared in the set's content_codes.region.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationRecord']} })
+    image_iscc: Optional[str] = Field(default=None, description="""ISCC code of the whole source image, made as declared in the set's content_codes.image - for example the ISCC-SUM (IMAGEWALK) that omero-iscc stores on OMERO images. Identifies the source by content, whatever its URI.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationRecord']} })
     transformations: Optional[str] = Field(default=None, description="""Transformations needed to align the annotation with the source image, e.g. a rotation or crop.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationRecord'], 'exact_mappings': ['mifa:transformations']} })
     external_ids: Optional[str] = Field(default=None, description="""Identifiers of copies in other systems as a JSON object, e.g. {\"omero_roi\":\"123\",\"omero_label_image\":\"456\"}.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationRecord']} })
 
@@ -836,4 +888,6 @@ Patches.model_rebuild()
 Split.model_rebuild()
 Normalization.model_rebuild()
 Session.model_rebuild()
+ContentCodes.model_rebuild()
+CodeMethod.model_rebuild()
 AnnotationRecord.model_rebuild()

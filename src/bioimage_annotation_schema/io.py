@@ -74,6 +74,25 @@ def validate_records(records: Iterable[AnnotationRecord]) -> list[str]:
     return problems
 
 
+def check_documents(
+    annotation_set: AnnotationSet, records: Iterable[AnnotationRecord]
+) -> list[str]:
+    """What the set and its records say about each other that does not hold: a
+    record's session must be one of the set's sessions, and ISCC codes need the
+    set's ``content_codes`` to say how they were made."""
+    sessions = {s.id for s in annotation_set.sessions or []}
+    codes = annotation_set.content_codes
+    problems: list[str] = []
+    for i, record in enumerate(records, start=1):
+        if record.session is not None and record.session not in sessions:
+            problems.append(f"row {i}: session {record.session} is not in the set's sessions")
+        if (record.input_iscc or record.mask_iscc) and not (codes and codes.region):
+            problems.append(f"row {i}: has region ISCC codes but content_codes.region is missing")
+        if record.image_iscc and not (codes and codes.image):
+            problems.append(f"row {i}: has image_iscc but content_codes.image is missing")
+    return problems
+
+
 def _pydantic_problems(error: ValidationError, where: str = "") -> list[str]:
     return [
         f"{where}{'.'.join(map(str, e['loc'])) or '(document)'}: {e['msg']}"

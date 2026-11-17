@@ -169,6 +169,14 @@
             "null"
           ]
         },
+        "image_iscc": {
+          "description": "ISCC code of the whole source image, made as declared in the set's content_codes.image - for example the ISCC-SUM (IMAGEWALK) that omero-iscc stores on OMERO images. Identifies the source by content, whatever its URI.",
+          "pattern": "^ISCC:[A-Z2-7]+$",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "image_name": {
           "description": "Name of the source image, for people.",
           "type": [
@@ -196,7 +204,7 @@
           ]
         },
         "input_iscc": {
-          "description": "ISCC Image-Code of the annotated image region.",
+          "description": "ISCC code of the annotated image region, made as declared in the set's content_codes.region.",
           "pattern": "^ISCC:[A-Z2-7]+$",
           "type": [
             "string",
@@ -227,7 +235,7 @@
           ]
         },
         "mask_iscc": {
-          "description": "ISCC Image-Code of the mask.",
+          "description": "ISCC code of the mask, made as declared in the set's content_codes.region.",
           "pattern": "^ISCC:[A-Z2-7]+$",
           "type": [
             "string",
@@ -393,6 +401,17 @@
             "array",
             "null"
           ]
+        },
+        "content_codes": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ContentCodes"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "How the ISCC codes in the records were made. Required when any record has input_iscc, mask_iscc or image_iscc: codes are only comparable when they were made the same way."
         },
         "created": {
           "description": "When the set was created.",
@@ -581,6 +600,82 @@
         "string"
       ]
     },
+    "CodeMethod": {
+      "additionalProperties": false,
+      "description": "How one kind of ISCC code was computed.",
+      "properties": {
+        "bits": {
+          "description": "Length of the code's body in bits, e.g. 64 for an Image-Code unit, 128 or 256 (wide) for an ISCC-SUM.",
+          "minimum": 1,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "code_type": {
+          "$ref": "#/$defs/IsccCodeType",
+          "description": "The ISCC code type."
+        },
+        "implementation": {
+          "description": "Software and version that computed the codes, e.g. 'omero-annotate-ai 0.6.0 (iscc-lib 0.7.1)'.",
+          "type": "string"
+        },
+        "pixels": {
+          "description": "Which pixels were coded, e.g. 'the annotated region as saved in input_file' or 'all planes of the source image'.",
+          "type": "string"
+        },
+        "preparation": {
+          "description": "What was done to the pixels before coding: plane order and byte encoding, projection, resizing, intensity scaling, mask binarisation. 'none' if the stored pixels were coded as they are.",
+          "type": "string"
+        },
+        "specification": {
+          "description": "The specification the preparation follows, if any, e.g. https://ieps.iscc.codes/iep-0018/ (IMAGEWALK) for bioimage ISCC-SUMs.",
+          "format": "uri",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "code_type",
+        "pixels",
+        "preparation",
+        "implementation"
+      ],
+      "title": "CodeMethod",
+      "type": "object"
+    },
+    "ContentCodes": {
+      "additionalProperties": false,
+      "description": "How the ISCC codes (ISO 24138) in the records were made. ISCC is a family of codes: the same image gives different codes depending on the code type, which pixels are coded and how they are prepared, so each kind is declared here.",
+      "properties": {
+        "image": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CodeMethod"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "How image_iscc (the code of the whole source image) was made."
+        },
+        "region": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CodeMethod"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "How input_iscc and mask_iscc were made."
+        }
+      },
+      "title": "ContentCodes",
+      "type": "object"
+    },
     "Coverage": {
       "description": "How completely the objects in an annotated region are annotated.",
       "enum": [
@@ -610,6 +705,16 @@
       ],
       "title": "Grant",
       "type": "object"
+    },
+    "IsccCodeType": {
+      "description": "ISCC code types used for images.",
+      "enum": [
+        "image_code",
+        "iscc_sum",
+        "iscc_code"
+      ],
+      "title": "IsccCodeType",
+      "type": "string"
     },
     "License": {
       "description": "Licenses the BioImage Archive accepts for annotations.",
@@ -1511,6 +1616,17 @@
         "array",
         "null"
       ]
+    },
+    "content_codes": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ContentCodes"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "How the ISCC codes in the records were made. Required when any record has input_iscc, mask_iscc or image_iscc: codes are only comparable when they were made the same way."
     },
     "created": {
       "description": "When the set was created.",
