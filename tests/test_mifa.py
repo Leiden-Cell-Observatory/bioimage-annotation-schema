@@ -76,8 +76,11 @@ class TestMifaDocuments:
         annotation_set = read_set(set_folder)  # still a valid set
         assert check_mifa(annotation_set) == ["study.funding_statement", "keywords", "version"]
         with pytest.raises(MifaNotReady) as error:
-            save_mifa(annotation_set, read_records(set_folder), tmp_path)
+            save_mifa(annotation_set, read_records(set_folder), tmp_path / "mifa")
         assert "keywords" in error.value.missing
+        with pytest.raises(MifaNotReady):
+            save_bia_package(annotation_set, read_records(set_folder), set_folder, tmp_path / "bia")
+        assert not (tmp_path / "mifa").exists() and not (tmp_path / "bia").exists()
 
 
 class TestBiaBundle:

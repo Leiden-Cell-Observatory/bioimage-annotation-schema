@@ -317,11 +317,11 @@ def save_mifa(
     ``<Class>_<accession>.yaml``. The accession defaults to the source dataset's
     identifier, else the set's name."""
     _, yaml_dumper = _import_mifa()
+    docs = to_mifa(annotation_set, records, file_ids=file_ids)  # refuses before writing
     directory = Path(directory)
     directory.mkdir(parents=True, exist_ok=True)
     source = annotation_set.source_dataset
     accession = _slug(accession or (source.identifier if source else None) or annotation_set.name)
-    docs = to_mifa(annotation_set, records, file_ids=file_ids)
     paths = {}
     for key, class_name in (("study", "Study"), ("annotations", "Annotations"), ("version", "Version")):
         doc = docs[key]
@@ -374,6 +374,8 @@ def save_bia_package(
     transferred and files missing.
     """
     records = annotated(records)
+    if missing := check_mifa(annotation_set):
+        raise MifaNotReady(missing)  # before anything is written
     folder, dest = Path(folder), Path(dest)
     metadata = save_mifa(annotation_set, records, dest / "metadata", accession=accession)
 
