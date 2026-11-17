@@ -78,14 +78,17 @@ def check_documents(
     annotation_set: AnnotationSet, records: Iterable[AnnotationRecord]
 ) -> list[str]:
     """What the set and its records say about each other that does not hold: a
-    record's session must be one of the set's sessions, and ISCC codes need the
-    set's ``content_codes`` to say how they were made."""
+    record's session must be one of the set's sessions, ``omero:image:`` URIs need
+    the set's ``omero_server``, and ISCC codes need the set's ``content_codes`` to
+    say how they were made."""
     sessions = {s.id for s in annotation_set.sessions or []}
     codes = annotation_set.content_codes
     problems: list[str] = []
     for i, record in enumerate(records, start=1):
         if record.session is not None and record.session not in sessions:
             problems.append(f"row {i}: session {record.session} is not in the set's sessions")
+        if record.image_uri.startswith("omero:image:") and not annotation_set.omero_server:
+            problems.append(f"row {i}: has an omero:image: URI but the set has no omero_server")
         if (record.input_iscc or record.mask_iscc) and not (codes and codes.region):
             problems.append(f"row {i}: has region ISCC codes but content_codes.region is missing")
         if record.image_iscc and not (codes and codes.image):

@@ -37,6 +37,9 @@ source_dataset:
   description: 384-well plate, Hoechst and brightfield
   identifier: idr0000
   url: https://idr.openmicroscopy.org/
+omero_server:
+  host: wss://idr.openmicroscopy.org/omero-ws
+  web_url: https://idr.openmicroscopy.org/webclient/
 methodology:
   overview: Instance masks of nuclei, proposed by micro-SAM and corrected by hand
   annotation_types: [segmentation_mask]

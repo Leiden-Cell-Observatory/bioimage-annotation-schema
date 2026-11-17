@@ -94,6 +94,14 @@ class TestRoCrate:
         _, by_id = _crate(set_folder)
         assert not any("/home/jane" in json.dumps(e) for e in by_id.values())
 
+    def test_omero_sources_name_their_server(self, set_folder):
+        by_id = {
+            e["@id"]: e
+            for e in build_ro_crate(read_set(set_folder), read_records(set_folder), set_folder)["@graph"]
+        }
+        assert by_id["omero:image:101"]["isPartOf"] == {"@id": "#omero-server"}
+        assert by_id["#omero-server"]["url"] == "https://idr.openmicroscopy.org/webclient/"
+
     def test_iscc_codes_say_how_they_were_made(self, set_folder):
         annotation_set, records = read_set(set_folder), read_records(set_folder)
         annotation_set.content_codes = ContentCodes(
@@ -108,3 +116,4 @@ class TestRoCrate:
         code = by_id["#a1b2c3-input-iscc"]
         assert code["name"] == "ISCC image_code of the region; none (tool 1)"
         assert by_id["omero:image:101"]["identifier"] == "ISCC:KAA4GQZQTY6J5DTH"
+

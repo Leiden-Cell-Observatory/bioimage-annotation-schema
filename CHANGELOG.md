@@ -23,6 +23,9 @@ fixes descriptions or loosens constraints.
   `check_documents` (run by `bas validate`) requires it, and checks that records
   name existing sessions. The pixel digest's description says how it differs from
   IMAGEWALK (IEP-0018).
+- `omero_server` (host, OMERO.web address, database UUID) says which OMERO server
+  the records' `omero:image:<id>` URIs refer to; `check_documents` requires it when
+  any record has such a URI, and the RO-Crate links each OMERO source image to it.
 - Documentation site (Zensical): overview tree, class diagram you can zoom and pan, interactive model
   browser, MIFA crosswalk and LinkML reference pages, all generated from the schema.
   Every class, field and allowed value has a description.

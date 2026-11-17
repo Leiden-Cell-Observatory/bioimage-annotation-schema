@@ -114,6 +114,12 @@ classes:
         description: The image dataset the annotated images come from.
         range: SourceDataset
         inlined: true
+      omero_server:
+        description: >-
+          The OMERO server the records' omero:image:<id> URIs refer to. Required when
+          any record has such a URI: an OMERO image ID means nothing without its server.
+        range: OmeroServer
+        inlined: true
       methodology:
         description: How the annotations were made.
         range: Methodology
@@ -604,6 +610,24 @@ classes:
       note:
         description: Free-text note by the annotator.
 
+  OmeroServer:
+    description: >-
+      An OMERO server, so that omero:image:<id> URIs can be traced to their images.
+    attributes:
+      host:
+        description: >-
+          How a client connects to the server: host and port (omero.example.org:4064)
+          or a websocket URL (wss://omero.example.org/omero-ws).
+        required: true
+      web_url:
+        description: Address of the server's OMERO.web, for people to look at the images.
+        range: uri
+        slot_uri: schema:url
+      database_uuid:
+        description: >-
+          The UUID of the server's database, which stays the same when the server's
+          address changes.
+
   ContentCodes:
     description: >-
       How the ISCC codes (ISO 24138) in the records were made. ISCC is a family of
@@ -669,8 +693,8 @@ classes:
           - mifa:annotation_id
       image_uri:
         description: >-
-          The source image - omero:image:<id>, an http(s) URL of an OME-Zarr image,
-          or another resolvable URI.
+          The source image - omero:image:<id> (on the set's omero_server), an http(s)
+          URL of an OME-Zarr image, or another resolvable URI.
         required: true
         exact_mappings:
           - mifa:source_image_id

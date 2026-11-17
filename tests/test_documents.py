@@ -1,4 +1,5 @@
-"""Checks that span the set and its records: sessions and ISCC code methods."""
+"""Checks that span the set and its records: sessions, the OMERO server and ISCC
+code methods."""
 
 from bioimage_annotation_schema import check_documents, read_records, read_set
 from bioimage_annotation_schema.cli import main
@@ -30,6 +31,13 @@ class TestCheckDocuments:
         assert check_documents(read_set(set_folder), records) == [
             "row 1: session 99 is not in the set's sessions"
         ]
+
+    def test_omero_images_need_their_server(self, set_folder):
+        annotation_set, records = read_set(set_folder), read_records(set_folder)
+        annotation_set.omero_server = None
+        problems = check_documents(annotation_set, records)
+        assert problems[0] == "row 1: has an omero:image: URI but the set has no omero_server"
+        assert len(problems) == len(records)
 
     def test_region_codes_need_their_method(self, set_folder):
         annotation_set, records = _with_codes(set_folder, input_iscc=CODE)

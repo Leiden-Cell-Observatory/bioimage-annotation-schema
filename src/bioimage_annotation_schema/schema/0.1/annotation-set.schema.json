@@ -185,7 +185,7 @@
           ]
         },
         "image_uri": {
-          "description": "The source image - omero:image:<id>, an http(s) URL of an OME-Zarr image, or another resolvable URI.",
+          "description": "The source image - omero:image:<id> (on the set's omero_server), an http(s) URL of an OME-Zarr image, or another resolvable URI.",
           "type": "string"
         },
         "input_digest": {
@@ -485,6 +485,17 @@
             "string",
             "null"
           ]
+        },
+        "omero_server": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OmeroServer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The OMERO server the records' omero:image:<id> URIs refer to. Required when any record has such a URI: an OMERO image ID means nothing without its server."
         },
         "previous_version": {
           "description": "Identifier (DOI or URL) of the previous version of the set.",
@@ -954,6 +965,36 @@
       ],
       "title": "NormalizationMethod",
       "type": "string"
+    },
+    "OmeroServer": {
+      "additionalProperties": false,
+      "description": "An OMERO server, so that omero:image:<id> URIs can be traced to their images.",
+      "properties": {
+        "database_uuid": {
+          "description": "The UUID of the server's database, which stays the same when the server's address changes.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "host": {
+          "description": "How a client connects to the server: host and port (omero.example.org:4064) or a websocket URL (wss://omero.example.org/omero-ws).",
+          "type": "string"
+        },
+        "web_url": {
+          "description": "Address of the server's OMERO.web, for people to look at the images.",
+          "format": "uri",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "host"
+      ],
+      "title": "OmeroServer",
+      "type": "object"
     },
     "Organisation": {
       "additionalProperties": false,
@@ -1708,6 +1749,17 @@
         "string",
         "null"
       ]
+    },
+    "omero_server": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/OmeroServer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "The OMERO server the records' omero:image:<id> URIs refer to. Required when any record has such a URI: an OMERO image ID means nothing without its server."
     },
     "previous_version": {
       "description": "Identifier (DOI or URL) of the previous version of the set.",
