@@ -435,6 +435,7 @@ class AnnotationSet(ConfiguredBaseModel):
     links: Optional[list[Link]] = Field(default=None, description="""Web pages about the set or its data, e.g. a repository or a project page.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet']} })
     study: Optional[Study] = Field(default=None, description="""The biological and experimental context of the images.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet']} })
     source_dataset: Optional[SourceDataset] = Field(default=None, description="""The image dataset the annotated images come from.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet']} })
+    omero_server: Optional[OmeroServer] = Field(default=None, description="""The OMERO server the records' omero:image:<id> URIs refer to. Required when any record has such a URI: an OMERO image ID means nothing without its server.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet']} })
     methodology: Methodology = Field(default=..., description="""How the annotations were made.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet']} })
     classes: Optional[list[AnnotationClass]] = Field(default=None, description="""The annotation classes (e.g. nucleus, cell, background).""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet']} })
     sampling: Optional[Sampling] = Field(default=None, description="""Which channels, planes and regions of the images were annotated.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet']} })
@@ -784,6 +785,17 @@ class Session(ConfiguredBaseModel):
     note: Optional[str] = Field(default=None, description="""Free-text note by the annotator.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Session']} })
 
 
+class OmeroServer(ConfiguredBaseModel):
+    """
+    An OMERO server, so that omero:image:<id> URIs can be traced to their images.
+    """
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://w3id.org/bioimage-annotation-schema'})
+
+    host: str = Field(default=..., description="""How a client connects to the server: host and port (omero.example.org:4064) or a websocket URL (wss://omero.example.org/omero-ws).""", json_schema_extra = { "linkml_meta": {'domain_of': ['OmeroServer']} })
+    web_url: Optional[str] = Field(default=None, description="""Address of the server's OMERO.web, for people to look at the images.""", json_schema_extra = { "linkml_meta": {'domain_of': ['OmeroServer'], 'slot_uri': 'schema:url'} })
+    database_uuid: Optional[str] = Field(default=None, description="""The UUID of the server's database, which stays the same when the server's address changes.""", json_schema_extra = { "linkml_meta": {'domain_of': ['OmeroServer']} })
+
+
 class ContentCodes(ConfiguredBaseModel):
     """
     How the ISCC codes (ISO 24138) in the records were made. ISCC is a family of codes: the same image gives different codes depending on the code type, which pixels are coded and how they are prepared, so each kind is declared here.
@@ -837,7 +849,7 @@ class AnnotationRecord(ConfiguredBaseModel):
     annotation_id: str = Field(default=..., description="""Identifier of the annotation, unique within the set. Files are named after it.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationRecord'],
          'exact_mappings': ['mifa:annotation_id'],
          'slot_uri': 'schema:identifier'} })
-    image_uri: str = Field(default=..., description="""The source image - omero:image:<id>, an http(s) URL of an OME-Zarr image, or another resolvable URI.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationRecord'], 'exact_mappings': ['mifa:source_image_id']} })
+    image_uri: str = Field(default=..., description="""The source image - omero:image:<id> (on the set's omero_server), an http(s) URL of an OME-Zarr image, or another resolvable URI.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationRecord'], 'exact_mappings': ['mifa:source_image_id']} })
     image_name: Optional[str] = Field(default=None, description="""Name of the source image, for people.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationRecord']} })
     level: Optional[int] = Field(default=None, description="""Multiscale level the coordinates refer to (0 = full resolution).""", ge=0, json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationRecord']} })
     well: Optional[str] = Field(default=None, description="""Plate well, e.g. B2.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationRecord']} })
@@ -891,6 +903,7 @@ Patches.model_rebuild()
 Split.model_rebuild()
 Normalization.model_rebuild()
 Session.model_rebuild()
+OmeroServer.model_rebuild()
 ContentCodes.model_rebuild()
 CodeMethod.model_rebuild()
 AnnotationRecord.model_rebuild()

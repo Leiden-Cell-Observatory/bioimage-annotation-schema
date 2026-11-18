@@ -258,6 +258,20 @@ def build_ro_crate(
     graph = _Graph(folder, annotation_set)
     parts = [graph.file(p) for name in metadata_files if (p := _inside(folder, name))]
 
+    server = annotation_set.omero_server
+    server_entity: Entity = {}
+    if server:  # the OMERO server that omero:image:<id> sources are on
+        server_entity = {
+            "@id": "#omero-server",
+            "@type": "DataCatalog",
+            "name": f"OMERO server {server.host}",
+        }
+        server_entity |= {
+            k: v
+            for k, v in (("url", server.web_url), ("identifier", server.database_uuid))
+            if v
+        }
+
     masks_by_session: dict[int, list[dict[str, str]]] = {}
     by_split: dict[str, list[dict[str, str]]] = {}
     for record in records:
@@ -268,6 +282,8 @@ def build_ro_crate(
         }
         if record.image_iscc:
             source_entity["identifier"] = record.image_iscc
+        if server_entity and record.image_uri.startswith("omero:image:"):
+            source_entity["isPartOf"] = graph.add(server_entity)
         source = graph.add(source_entity)
         based_on = [source]
         if image := _inside(folder, record.input_file):
