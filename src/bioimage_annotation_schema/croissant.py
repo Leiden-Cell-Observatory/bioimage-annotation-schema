@@ -140,9 +140,9 @@ def check_croissant(annotation_set: AnnotationSet) -> list[str]:
     """The fields Croissant requires that the set does not have (empty when ready).
 
     Croissant's ``description``, ``creator`` and ``url`` are the set's description,
-    authors and first link.
+    authors and url (where the set is published).
     """
-    required = ("description", "authors", "links")
+    required = ("description", "authors", "url")
     return [name for name in required if not getattr(annotation_set, name)]
 
 
@@ -318,7 +318,7 @@ def _dataset(annotation_set: AnnotationSet) -> Node:
         "conformsTo": [SPEC, RAI_SPEC],
         "name": annotation_set.name,
         "description": annotation_set.description,
-        "url": annotation_set.links[0].url if annotation_set.links else None,
+        "url": annotation_set.url,
         "license": f"https://spdx.org/licenses/{annotation_set.license}",
         "creator": [_person(p) for p in annotation_set.authors or []],
         "contributor": [_person(p) for p in meth.annotators or []],

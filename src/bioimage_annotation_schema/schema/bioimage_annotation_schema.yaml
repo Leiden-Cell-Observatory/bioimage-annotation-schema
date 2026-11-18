@@ -62,6 +62,12 @@ classes:
         slot_uri: schema:license
         exact_mappings:
           - mifa:license
+      url:
+        description: >-
+          Address where this set is published, e.g. its DOI (as https://doi.org/...) or its
+          page in an archive. Not the source images (source_dataset) or the analysis code (links).
+        range: uri
+        slot_uri: schema:url
       version:
         description: Version of this set, e.g. "1" or "1.1".
         exact_mappings:

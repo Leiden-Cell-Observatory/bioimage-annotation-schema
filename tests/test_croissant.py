@@ -42,7 +42,7 @@ class TestCroissant:
         assert doc["name"] == "u2os-nuclei-hcs"
         assert doc["description"].startswith("Nuclei in a U2OS")
         assert doc["license"] == "https://spdx.org/licenses/CC-BY-4.0"
-        assert doc["url"] == "https://github.com/example/u2os-nuclei"
+        assert doc["url"] == "https://doi.org/10.5281/zenodo.0000001"
         assert (doc["version"], doc["keywords"][0]) == ("1", "nuclei")
         assert doc["dateCreated"] == "2026-11-10T14:02:00+01:00"
         creator = doc["creator"][0]
@@ -162,7 +162,7 @@ class TestCroissant:
         }]
 
     @pytest.mark.parametrize("key,named", [("description", "description"), ("authors", "authors"),
-                                           ("links", "links")])
+                                           ("url", "url")])
     def test_a_set_missing_a_required_field_is_refused(self, set_folder, key, named):
         _edit_set(set_folder, lambda data: data.pop(key))
         annotation_set = read_set(set_folder)

@@ -73,7 +73,7 @@ The MIFA export needs `bia-mifa-models`, which is not on PyPI:
 `pip install "git+https://github.com/BioImage-Archive/bia-mifa-models.git@v1.1.5"`.
 
 The Croissant and bioimage.io exports follow the same rule: a set that lacks what the
-format asks for (a description, authors, a link; for bioimage.io also keywords and a
+format asks for (a description, authors, the address of the set (`url`); for bioimage.io also keywords and a
 publication with a DOI) is refused with the names of the missing fields.
 
 - **Croissant** (`croissant.json`): the set as a `sc:Dataset`, its files, and record sets

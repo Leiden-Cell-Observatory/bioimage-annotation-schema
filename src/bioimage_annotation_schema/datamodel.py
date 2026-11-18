@@ -419,6 +419,8 @@ class AnnotationSet(ConfiguredBaseModel):
     license: License = Field(default=..., description="""License of the annotations. Only the two licences the BioImage Archive accepts are allowed.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet', 'SourceDataset'],
          'exact_mappings': ['mifa:license'],
          'slot_uri': 'schema:license'} })
+    url: Optional[str] = Field(default=None, description="""Address where this set is published, e.g. its DOI (as https://doi.org/...) or its page in an archive. Not the source images (source_dataset) or the analysis code (links).""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet', 'Link', 'SourceDataset', 'Model'],
+         'slot_uri': 'schema:url'} })
     version: Optional[str] = Field(default=None, description="""Version of this set, e.g. \"1\" or \"1.1\".""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet', 'Tool', 'Model'],
          'exact_mappings': ['mifa:version']} })
     changes: Optional[str] = Field(default=None, description="""What changed since the previous version.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet'], 'exact_mappings': ['mifa:changes']} })
@@ -532,7 +534,7 @@ class Link(ConfiguredBaseModel):
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://w3id.org/bioimage-annotation-schema'})
 
-    url: str = Field(default=..., description="""URL of the page.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Link', 'SourceDataset', 'Model'],
+    url: str = Field(default=..., description="""URL of the page.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet', 'Link', 'SourceDataset', 'Model'],
          'exact_mappings': ['mifa:link_url'],
          'slot_uri': 'schema:url'} })
     description: Optional[str] = Field(default=None, description="""What the linked page contains.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet',
@@ -606,7 +608,8 @@ class SourceDataset(ConfiguredBaseModel):
                        'SourceDataset',
                        'AnnotationClass']} })
     identifier: Optional[str] = Field(default=None, description="""Accession or DOI, e.g. S-BIAD123 or idr0001.""", json_schema_extra = { "linkml_meta": {'domain_of': ['SourceDataset'], 'slot_uri': 'schema:identifier'} })
-    url: Optional[str] = Field(default=None, description="""Web page or download address of the dataset.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Link', 'SourceDataset', 'Model'], 'slot_uri': 'schema:url'} })
+    url: Optional[str] = Field(default=None, description="""Web page or download address of the dataset.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet', 'Link', 'SourceDataset', 'Model'],
+         'slot_uri': 'schema:url'} })
     license: Optional[str] = Field(default=None, description="""License of the source images, e.g. CC-BY-4.0.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet', 'SourceDataset'], 'slot_uri': 'schema:license'} })
 
 
@@ -662,7 +665,7 @@ class Model(ConfiguredBaseModel):
                        'Model',
                        'AnnotationClass']} })
     version: Optional[str] = Field(default=None, description="""Version of the model.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet', 'Tool', 'Model']} })
-    url: Optional[str] = Field(default=None, description="""Where the model can be found, e.g. a BioImage Model Zoo page.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Link', 'SourceDataset', 'Model']} })
+    url: Optional[str] = Field(default=None, description="""Where the model can be found, e.g. a BioImage Model Zoo page.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationSet', 'Link', 'SourceDataset', 'Model']} })
     doi: Optional[str] = Field(default=None, description="""DOI of the model.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Publication', 'Model']} })
 
 

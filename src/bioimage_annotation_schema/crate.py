@@ -12,7 +12,9 @@ workflow tools read. For an annotation set it lists:
   ``#source-<hash>`` id instead,
 - every annotation session as an action: who, when, which software and model, its
   note, and the masks it saved (an annotate session is a ``CreateAction``, a review
-  an ``UpdateAction``).
+  an ``UpdateAction``),
+- the split: a ``Collection`` per split (training, validation, test) with its image
+  regions and masks, under one ``#split`` collection that says how the split was made.
 """
 
 from __future__ import annotations
@@ -196,6 +198,27 @@ def _session_action(graph: _Graph, session: Session, masks: list[dict[str, str]]
     return action
 
 
+def _split(annotation_set: AnnotationSet, by_split: dict[str, list[dict[str, str]]]) -> Entity:
+    """The split as a collection of one collection per split, with how it was made."""
+    entity: Entity = {
+        "@id": "#split",
+        "@type": "Collection",
+        "name": "Split",
+        "hasPart": [_ref(f"#split-{name}") for name in by_split],
+    }
+    if split := annotation_set.split:
+        facts = [
+            f"assigned per {split.unit}" if split.unit else None,
+            split.rationale.rstrip(".") if split.rationale else None,
+            f"strategy {split.strategy}" if split.strategy else None,
+            f"balanced on {', '.join(split.stratify_by)}" if split.stratify_by else None,
+            f"seed {split.seed}" if split.seed is not None else None,
+        ]
+        if text := "; ".join(fact for fact in facts if fact):
+            entity["description"] = text[0].upper() + text[1:] + "."
+    return entity
+
+
 def _authors(graph: _Graph, annotation_set: AnnotationSet) -> list[dict[str, str]]:
     authors = []
     for i, author in enumerate(annotation_set.authors or []):
@@ -236,6 +259,7 @@ def build_ro_crate(
     parts = [graph.file(p) for name in metadata_files if (p := _inside(folder, name))]
 
     masks_by_session: dict[int, list[dict[str, str]]] = {}
+    by_split: dict[str, list[dict[str, str]]] = {}
     for record in records:
         source_entity: Entity = {
             "@id": _source_id(record.image_uri),
@@ -255,6 +279,7 @@ def build_ro_crate(
                 ),
             )
             parts.append(image_ref)
+            by_split.setdefault(record.split, []).append(image_ref)
             based_on = [image_ref, source]
         mask = _inside(folder, record.mask_file)
         if record.status == "annotated" and mask:
@@ -266,6 +291,7 @@ def build_ro_crate(
                 ),
             )
             parts.append(mask_ref)
+            by_split.setdefault(record.split, []).append(mask_ref)
             if record.session is not None:
                 masks_by_session.setdefault(record.session, []).append(mask_ref)
 
@@ -273,6 +299,13 @@ def build_ro_crate(
         graph.add(_session_action(graph, s, masks_by_session.get(s.id, [])))
         for s in annotation_set.sessions or []
     ]
+    mentions = list(actions)
+    if by_split:
+        for name, files in by_split.items():
+            graph.add(
+                {"@id": f"#split-{name}", "@type": "Collection", "name": name, "hasPart": files}
+            )
+        mentions.append(graph.add(_split(annotation_set, by_split)))
     study = annotation_set.study
     source_dataset = annotation_set.source_dataset
     root: Entity = {
@@ -293,7 +326,7 @@ def build_ro_crate(
             }
         ),
         "hasPart": parts,
-        "mentions": actions,
+        "mentions": mentions,
     }
     if authors := _authors(graph, annotation_set):
         root["author"] = authors

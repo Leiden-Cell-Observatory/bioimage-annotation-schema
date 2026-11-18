@@ -32,3 +32,11 @@ fixes descriptions or loosens constraints.
   RAI properties and the schema's own terms. Loads in `mlcroissant`.
 - bioimage.io export (`write_bioimageio_dataset`, `bas bioimageio`): `rdf.yaml`, a
   dataset description in format 0.3.4 that validates with `bioimageio.spec`.
+- RO-Crate export: the split is in the metadata graph. Each split (training,
+  validation, test) is a `Collection` of its image regions and masks, under a `#split`
+  collection that says how the split was made (unit, rationale, strategy, balancing,
+  seed). Before, the split was only inside `annotation-set.yaml`.
+- New optional `AnnotationSet.url`: where the set itself is published (DOI or archive
+  page). The Croissant `url` and the bioimage.io `source` are this address and both
+  exports require it; they used the set's first link before, which may be the analysis
+  code.

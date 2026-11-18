@@ -53,6 +53,21 @@ class TestRoCrate:
         digest = by_id[mask["identifier"]["@id"]]
         assert digest["propertyID"] == "pixel-sha256"
 
+    def test_split_is_in_the_graph_with_its_files_and_how_it_was_made(self, set_folder):
+        crate, by_id = _crate(set_folder)
+        split = by_id["#split"]
+        assert {"@id": "#split"} in _many(by_id["./"]["mentions"])
+        assert split["description"] == (
+            "Assigned per well; fields within a well show the same cells' neighbourhood; "
+            "strategy random_split; balanced on treatment; seed 42."
+        )
+        assert _many(split["hasPart"]) == [{"@id": "#split-training"}, {"@id": "#split-validation"}]
+        assert _many(by_id["#split-training"]["hasPart"]) == [
+            {"@id": "annotation_input/a1b2c3.tif"},
+            {"@id": "annotation_output/a1b2c3_mask.tif"},
+        ]
+        assert {"@id": "annotation_output/d4e5f6_mask.tif"} in by_id["#split-validation"]["hasPart"]
+
     def test_excluded_and_pending_units_list_no_mask(self, set_folder):
         _, by_id = _crate(set_folder)
         assert not any("g7h8i9" in i or "j0k1l2" in i for i in by_id if i.endswith(".tif"))
