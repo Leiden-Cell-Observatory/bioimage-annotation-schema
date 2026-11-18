@@ -552,6 +552,14 @@
           ],
           "description": "The biological and experimental context of the images."
         },
+        "url": {
+          "description": "Address where this set is published, e.g. its DOI (as https://doi.org/...) or its page in an archive. Not the source images (source_dataset) or the analysis code (links).",
+          "format": "uri",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "version": {
           "description": "Version of this set, e.g. \"1\" or \"1.1\".",
           "type": [
@@ -1766,6 +1774,14 @@
         }
       ],
       "description": "The biological and experimental context of the images."
+    },
+    "url": {
+      "description": "Address where this set is published, e.g. its DOI (as https://doi.org/...) or its page in an archive. Not the source images (source_dataset) or the analysis code (links).",
+      "format": "uri",
+      "type": [
+        "string",
+        "null"
+      ]
     },
     "version": {
       "description": "Version of this set, e.g. \"1\" or \"1.1\".",

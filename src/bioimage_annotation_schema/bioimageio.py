@@ -66,7 +66,7 @@ def check_bioimageio(annotation_set: AnnotationSet) -> list[str]:
         missing.append("name (5 to 128 letters, digits, spaces and _ + - ( ))")
     missing += [
         name
-        for name in ("description", "authors", "keywords", "links")
+        for name in ("description", "authors", "keywords", "url")
         if not getattr(annotation_set, name)
     ]
     if not _citations(annotation_set):
@@ -81,13 +81,12 @@ def build_bioimageio_dataset(
 ) -> dict[str, Any]:
     """The bioimage.io dataset description of an annotation set, as plain data.
 
-    The set's first link is the dataset's ``source``. Raises
+    The set's ``url`` is the dataset's ``source``. Raises
     :class:`BioimageioNotReady` when the set lacks a field bioimage.io asks for.
     """
     if missing := check_bioimageio(annotation_set):
         raise BioimageioNotReady(missing)
     folder = Path(folder)
-    assert annotation_set.links  # check_bioimageio
     authors = [
         {
             "name": f"{author.first_name} {author.last_name}",
@@ -110,7 +109,7 @@ def build_bioimageio_dataset(
         "version": annotation_set.version,
         # bioimage.io allows a comment of at most 512 characters
         "version_comment": changes if changes and len(changes) <= 512 else None,
-        "source": annotation_set.links[0].url,
+        "source": annotation_set.url,
         "attachments": [
             {"source": name, "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
             for name in (SET_FILE, RECORDS_FILE)

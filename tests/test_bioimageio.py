@@ -36,7 +36,7 @@ class TestBioimageioDataset:
         assert rdf["license"] == "CC-BY-4.0"
         assert rdf["tags"] == ["nuclei", "segmentation", "high-content screening"]
         assert rdf["version"] == "1"
-        assert rdf["source"] == "https://github.com/example/u2os-nuclei"
+        assert rdf["source"] == "https://doi.org/10.5281/zenodo.0000001"
         assert rdf["authors"] == [{
             "name": "Jane van Example",
             "orcid": "0000-0002-1825-0097",
@@ -70,7 +70,7 @@ class TestBioimageioDataset:
         ("description", "description"),
         ("authors", "authors"),
         ("keywords", "keywords"),
-        ("links", "links"),
+        ("url", "url"),
         ("study", "study.publications (with a doi)"),
     ])
     def test_a_set_missing_a_required_field_is_refused(self, set_folder, key, named):
