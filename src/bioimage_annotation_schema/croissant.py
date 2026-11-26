@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from collections.abc import Sequence
 from datetime import datetime
 from pathlib import Path
@@ -299,6 +300,39 @@ def _file_set(file_id: str, description: str, paths: Sequence[str]) -> Node:
     }
 
 
+_DOI_URL = re.compile(r"^https?://(dx\.)?doi\.org/", re.IGNORECASE)
+
+
+def _bibtex_value(text: str) -> str:
+    """A BibTeX field value: braces removed so the entry stays balanced."""
+    return text.replace("{", "").replace("}", "")
+
+
+def _cite_as(annotation_set: AnnotationSet) -> str:
+    """How to cite the set itself, as a BibTeX ``@misc`` entry (Croissant's ``citeAs``).
+
+    Built from the authors, name, version and url Croissant already requires; the
+    year is that of the last change. The study's papers stay under ``citation``:
+    their authors are free text, which BibTeX would misread.
+    """
+    authors = annotation_set.authors or []
+    year = _published(annotation_set)[:4]
+    first = re.sub(r"[^A-Za-z0-9]", "", authors[0].last_name) if authors else ""
+    url = str(annotation_set.url)
+    fields = {
+        "author": " and ".join(f"{p.last_name}, {p.first_name}" for p in authors),
+        "title": annotation_set.name,
+        "year": year,
+        "version": annotation_set.version,
+        "url": url,
+        "doi": _DOI_URL.sub("", url) if _DOI_URL.match(url) else None,
+    }
+    body = ",\n".join(
+        f"  {key} = {{{_bibtex_value(value)}}}" for key, value in fields.items() if value
+    )
+    return f"@misc{{{first or 'set'}{year},\n{body}\n}}"
+
+
 def _dataset(annotation_set: AnnotationSet) -> Node:
     """The dataset-level properties of the set."""
     meth = annotation_set.methodology
@@ -326,6 +360,7 @@ def _dataset(annotation_set: AnnotationSet) -> Node:
         "datePublished": _published(annotation_set),
         "version": annotation_set.version,
         "keywords": annotation_set.keywords,
+        "citeAs": _cite_as(annotation_set),
         "citation": [
             {
                 "@type": "sc:ScholarlyArticle",

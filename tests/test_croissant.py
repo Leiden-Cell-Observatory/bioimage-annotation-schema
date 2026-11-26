@@ -50,6 +50,9 @@ class TestCroissant:
         assert (creator["givenName"], creator["familyName"]) == ("Jane", "van Example")
         assert creator["affiliation"][0]["@id"] == "https://ror.org/027bh9e22"
         assert doc["citation"][0]["@id"] == "https://doi.org/10.1000/example"
+        assert doc["citeAs"].startswith("@misc{vanExample2026,\n")
+        assert "  author = {van Example, Jane}" in doc["citeAs"]
+        assert "  doi = {10.5281/zenodo.0000001}" in doc["citeAs"]
         assert doc["funding"][0]["identifier"] == "ERC-123"
         assert doc["prov:wasDerivedFrom"]["identifier"] == "idr0000"
 
@@ -215,8 +218,7 @@ class TestOfficialValidator:
 
     def test_no_errors(self, dataset):
         assert not dataset.metadata.ctx.issues.errors
-        # the set records no citation of itself, so the recommended citeAs is absent
-        assert all("citeAs" in w for w in dataset.metadata.ctx.issues.warnings)
+        assert not dataset.metadata.ctx.issues.warnings
 
     def test_annotations_load_with_mask_split_and_metadata(self, dataset):
         rows = list(dataset.records("annotations"))

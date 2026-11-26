@@ -32,7 +32,8 @@ fixes descriptions or loosens constraints.
 - Croissant export (`write_croissant`, `bas croissant`): `croissant.json` following
   Croissant 1.1 and Croissant RAI 1.0, with the files, a record per mask, the split as
   `cr:Split`, classes, sessions, and the fields Croissant has no property for under the
-  RAI properties and the schema's own terms. Loads in `mlcroissant`.
+  RAI properties and the schema's own terms. `citeAs` cites the set itself as a
+  BibTeX `@misc` entry. Loads in `mlcroissant` without warnings.
 - bioimage.io export (`write_bioimageio_dataset`, `bas bioimageio`): `rdf.yaml`, a
   dataset description in format 0.3.4 that validates with `bioimageio.spec`.
 - RO-Crate export: the split is in the metadata graph. Each split (training,
