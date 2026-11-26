@@ -80,7 +80,9 @@ publication with a DOI) is refused with the names of the missing fields.
   that load in [mlcroissant](https://pypi.org/project/mlcroissant/). `annotations` has one
   record per mask that is in the folder, with the columns of the records table; pending and
   excluded records are left out. The split is a `cr:Split` record set, the classes an
-  enumeration, the sessions PROV activities. What Croissant has no property for
+  enumeration, the sessions PROV activities. `citeAs` cites the set itself (BibTeX
+  `@misc` from its authors, name, version and url); the study's papers are under
+  `citation`. What Croissant has no property for
   (methodology, sampling, split unit and rationale, normalisation) is written in words
   under the Croissant RAI properties and as data under this schema's own terms (`bas:`).
 - **bioimage.io** (`rdf.yaml`): name, description, authors, citations, licence, tags,
